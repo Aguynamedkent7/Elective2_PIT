@@ -1,0 +1,15 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+keystore.properties
+*.jks
+*.keystore
+# handoff archive and duplicate plan copy
+numlab-handoff.zip
+PLAN(1).md
+CLAUDE.md.template
+numlab-handoff(1).zip
