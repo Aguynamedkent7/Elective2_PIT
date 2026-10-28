@@ -21,7 +21,8 @@ private val UNARY: Map<String, Fn> = mapOf(
 )
 private val CONSTS = mapOf("pi" to PI, "e" to E)
 private val LOGS = setOf("ln", "log", "log10", "log2")
-private val WS = Regex("(?U)\\s+")
+// JS `\s`, spelled out: Android ICU rejects the JVM-only `(?U)` flag.
+private val WS = Regex("[\\s\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000\\uFEFF]+")
 private val EXP_TAIL = Regex("^[+-]?\\d")
 
 private fun applyFn(name: String, v: Double): Double {

@@ -5,19 +5,24 @@ import app.numlab.domain.model.DomainException
 import app.numlab.domain.model.parseNumber
 import app.numlab.domain.parser.CompiledFn
 import app.numlab.domain.parser.ExprParser
+import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
+@Serializable
 enum class InterpMethod { LAGRANGE, NEWTON_DD }
 
 /** Where the "true" value comes from for error metrics. */
+@Serializable
 enum class Truth { NONE, FN, VALUE }
 
 /** One editable data row, kept as typed. */
+@Serializable
 data class PointRow(val x: String, val y: String)
 
+@Serializable
 data class InterpInput(
     val method: InterpMethod,
     val rows: List<PointRow>,

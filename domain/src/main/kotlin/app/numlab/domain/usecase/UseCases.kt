@@ -9,7 +9,10 @@ import app.numlab.domain.interp.InterpResult
 import app.numlab.domain.interp.ParsedPoints
 import app.numlab.domain.interp.interpolate
 import app.numlab.domain.interp.parsePoints
+import app.numlab.domain.model.HistoryItem
+import app.numlab.domain.model.RunInput
 import app.numlab.domain.model.domainCatching
+import app.numlab.domain.repo.HistoryRepository
 import app.numlab.domain.parser.ExprParser
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootResult
@@ -55,4 +58,20 @@ class BuildExportUseCase {
         ExportFormat.LATEX -> result.toLatex()
         ExportFormat.PLAIN -> result.toPlain()
     }
+}
+
+class SaveRunUseCase(private val repo: HistoryRepository) {
+    suspend operator fun invoke(run: RunInput) = repo.save(run)
+}
+
+class ObserveHistoryUseCase(private val repo: HistoryRepository) {
+    operator fun invoke() = repo.observe()
+}
+
+class DeleteRunUseCase(private val repo: HistoryRepository) {
+    suspend operator fun invoke(id: Long) = repo.delete(id)
+}
+
+class TogglePinUseCase(private val repo: HistoryRepository) {
+    suspend operator fun invoke(item: HistoryItem) = repo.setPinned(item.id, !item.pinned)
 }

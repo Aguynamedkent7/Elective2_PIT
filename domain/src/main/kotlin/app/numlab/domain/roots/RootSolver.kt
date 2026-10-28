@@ -5,13 +5,16 @@ import app.numlab.domain.model.DomainException
 import app.numlab.domain.model.parseNumber
 import app.numlab.domain.parser.CompiledFn
 import app.numlab.domain.parser.ExprParser
+import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.max
 
 /** Root-finding methods. Adding one = new entry + a branch in [solveRoot] + strings (PLAN §3.3). */
+@Serializable
 enum class RootMethod { BISECTION, NEWTON, SECANT }
 
 /** Raw inputs as typed by the user; numeric fields stay strings until validated. */
+@Serializable
 data class RootInput(
     val method: RootMethod,
     val fx: String,
