@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInRoot
@@ -80,7 +81,8 @@ fun BottomBar(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState, m
     var center by remember { mutableStateOf(Offset.Zero) }
     Column(
         modifier.fillMaxWidth()
-            .background(Brush.verticalGradient(0f to cs.background.copy(alpha = 0f), 0.38f to cs.background))
+            // Opaque from the end of the top padding down, so a caption wrapped by large fonts never sits on content.
+            .background(Brush.verticalGradient(listOf(cs.background.copy(alpha = 0f), cs.background), endY = with(LocalDensity.current) { 40.dp.toPx() }))
             .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),

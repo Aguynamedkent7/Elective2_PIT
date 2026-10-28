@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -60,26 +61,32 @@ fun DataTable(
     val state = rememberLazyListState()
     LaunchedEffect(active) { if (active != null && active > 0) state.animateScrollToItem(maxOf(0, active - 2)) }
     val pad = if (dense) 6.dp else 9.dp
-    Box(modifier.clip(RoundedCornerShape(16.dp)).background(cs.surface).horizontalScroll(rememberScrollState())) {
-        LazyColumn(Modifier.width(cols.fold(0.dp) { a, c -> a + c.width }).heightIn(max = maxHeight), state) {
-            stickyHeader {
-                Row(Modifier.background(cs.surfaceVariant)) {
-                    cols.forEach { c ->
-                        Text(c.header.uppercase(), Modifier.width(c.width).padding(horizontal = 8.dp, vertical = 10.dp),
-                            style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant, fontWeight = FontWeight.SemiBold,
-                            textAlign = if (c.start) TextAlign.Start else TextAlign.End)
+    BoxWithConstraints(modifier) {
+        // Columns stretch to fill wide containers (landscape, tablets); narrower ones scroll.
+        val total = cols.fold(0.dp) { a, c -> a + c.width }
+        val stretch = if (constraints.hasBoundedWidth && maxWidth > total) maxWidth / total else 1f
+        val fit = cols.map { it.copy(width = it.width * stretch) }
+        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(cs.surface).horizontalScroll(rememberScrollState())) {
+            LazyColumn(Modifier.width(total * stretch).heightIn(max = maxHeight), state) {
+                stickyHeader {
+                    Row(Modifier.background(cs.surfaceVariant)) {
+                        fit.forEach { c ->
+                            Text(c.header.uppercase(), Modifier.width(c.width).padding(horizontal = 8.dp, vertical = 10.dp),
+                                style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant, fontWeight = FontWeight.SemiBold,
+                                textAlign = if (c.start) TextAlign.Start else TextAlign.End)
+                        }
                     }
                 }
-            }
-            itemsIndexed(rows) { ri, row ->
-                val bg = when {
-                    ri == active -> cs.primary.copy(alpha = 0.16f).compositeOver(cs.surface)
-                    ri % 2 == 1 -> cs.surfaceVariant.copy(alpha = 0.55f).compositeOver(cs.surface)
-                    else -> cs.surface
-                }
-                Row(Modifier.background(bg).then(if (onRow != null) Modifier.clickable { onRow(ri) } else Modifier),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    row.forEachIndexed { ci, cell -> CellText(cell, cols[ci], pad, ri == active) }
+                itemsIndexed(rows) { ri, row ->
+                    val bg = when {
+                        ri == active -> cs.primary.copy(alpha = 0.16f).compositeOver(cs.surface)
+                        ri % 2 == 1 -> cs.surfaceVariant.copy(alpha = 0.55f).compositeOver(cs.surface)
+                        else -> cs.surface
+                    }
+                    Row(Modifier.background(bg).then(if (onRow != null) Modifier.clickable { onRow(ri) } else Modifier),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        row.forEachIndexed { ci, cell -> CellText(cell, fit[ci], pad, ri == active) }
+                    }
                 }
             }
         }
