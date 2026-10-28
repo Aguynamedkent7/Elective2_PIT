@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,7 +53,9 @@ class MainActivity : ComponentActivity() {
                 LocalHapticsEnabled provides settings.haptics,
             ) {
                 NumLabTheme(dark, settings.dynamicColor) {
-                    if (splash > 0) NumLabNavGraph(workbench, settings.decimals) { showSettings = true }
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        if (splash > 0) NumLabNavGraph(workbench, settings.decimals) { showSettings = true }
+                    }
                     if (showSettings) {
                         SettingsSheet(settings, BuildConfig.VERSION_NAME, settingsVm::update) { showSettings = false }
                     }
