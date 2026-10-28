@@ -24,7 +24,10 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 kotlin { jvmToolchain(17) }
@@ -39,6 +42,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.room.runtime)
+    implementation(libs.datastore.preferences)
     ksp(libs.hilt.compiler)
 }
