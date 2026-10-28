@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.numlab.ui.R
@@ -105,7 +106,8 @@ fun HomeScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState) 
                             IterationsPane(err.rows, st.root.tol.toDoubleOrNull() ?: 0.0, st.decimals, null, null, maxHeight = 260.dp)
                         }
                     }
-                    Spacer(Modifier.height(170.dp))
+                    // Clears the pinned Graph/Save bar, which grows with font scale (PLAN §6.7).
+                    Spacer(Modifier.height(170.dp * maxOf(1f, LocalDensity.current.fontScale * 0.8f)))
                 }
             }
         }

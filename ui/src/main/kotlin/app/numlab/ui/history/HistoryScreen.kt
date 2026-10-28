@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -96,15 +98,17 @@ fun HistoryScreen(vm: HistoryViewModel, decimals: Int, nav: HistoryNav) {
     val cs = MaterialTheme.colorScheme
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val ctx = LocalContext.current
+    val res = LocalResources.current
     val ex = rememberExporter()
-    val toast: (Int) -> Unit = { m -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(ctx.getString(m)) } }
+    val toast: (Int) -> Unit = { m -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(res.getString(m)) } }
+    // Bumped on Undo so a restored card gets a fresh (not dismissed) swipe state under a new key.
+    var epoch by remember { mutableIntStateOf(0) }
     val delete: (HistoryItem) -> Unit = { item ->
         vm.delete(item) { removed ->
             scope.launch {
                 snackbar.currentSnackbarData?.dismiss()
-                val r = snackbar.showSnackbar(ctx.getString(R.string.run_deleted), ctx.getString(R.string.undo), duration = SnackbarDuration.Long)
-                if (r == SnackbarResult.ActionPerformed) vm.restore(removed)
+                val r = snackbar.showSnackbar(res.getString(R.string.run_deleted), res.getString(R.string.undo), duration = SnackbarDuration.Long)
+                if (r == SnackbarResult.ActionPerformed) { epoch++; vm.restore(removed) }
             }
         }
     }
@@ -116,7 +120,7 @@ fun HistoryScreen(vm: HistoryViewModel, decimals: Int, nav: HistoryNav) {
         ) {
             item(key = "header") { Header(st, vm, nav) }
             if (st.loaded && st.cards.isEmpty()) item(key = "empty") { Empty(st.all == 0) }
-            itemsIndexed(st.cards, key = { _, c -> c.item.id }) { i, card ->
+            itemsIndexed(st.cards, key = { _, c -> "${c.item.id}/$epoch" }) { i, card ->
                 val dismiss = rememberSwipeToDismissBoxState()
                 SwipeToDismissBox(
                     dismiss,

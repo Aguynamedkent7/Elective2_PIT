@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -58,6 +59,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.numlab.ui.motion.LocalReduceMotion
@@ -108,7 +110,7 @@ fun <T> Seg(
     val x by animateDpAsState(w * i, if (LocalReduceMotion.current) tween(0) else tween(300, easing = Motion.Spring), label = "thumb")
     Box(modifier.fillMaxWidth().background(track, CircleShape).padding(4.dp).height(IntrinsicSize.Min)
         .onSizeChanged { width = it.width }) {
-        Box(Modifier.offset(x = x).width(w).fillMaxHeight().background(thumb, CircleShape))
+        Box(Modifier.offset { IntOffset(x.roundToPx(), 0) }.width(w).fillMaxHeight().background(thumb, CircleShape))
         Row(Modifier.fillMaxWidth().selectableGroup()) {
             options.forEach { (v, label) ->
                 Box(
@@ -118,7 +120,8 @@ fun <T> Seg(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        label, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        label, Modifier.padding(horizontal = 4.dp), maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = MaterialTheme.typography.labelLarge.fontSize),
                         style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium,
                         color = if (v == value) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -154,8 +157,9 @@ fun RoundBtn(
     container: Color = MaterialTheme.colorScheme.surface,
 ) = IconButton(
     onClick, modifier.size(48.dp), enabled,
-    colors = IconButtonDefaults.iconButtonColors(containerColor = container,
-        disabledContainerColor = container.copy(alpha = container.alpha * 0.5f)),
+    colors = IconButtonDefaults.iconButtonColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSurface,
+        disabledContainerColor = container.copy(alpha = container.alpha * 0.5f),
+        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)),
 ) { Icon(icon, label, Modifier.size(20.dp)) }
 
 /** −/+ box around a value (prototype `Stepper` and `NumField`). Pass [onText] to make it editable. */

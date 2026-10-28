@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -36,7 +37,9 @@ fun LogoLockup(modifier: Modifier = Modifier) {
                 }
             },
             fontFamily = Bricolage,
-            fontSize = 20.sp,
+            // Brand lockup: kept at its designed size so the header never wraps at 200 % font scale.
+            fontSize = (24 / LocalDensity.current.fontScale).sp,
+            maxLines = 1, softWrap = false,
         )
     }
 }

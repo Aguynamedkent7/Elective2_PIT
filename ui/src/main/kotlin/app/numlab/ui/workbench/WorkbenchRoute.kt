@@ -21,7 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -41,7 +41,7 @@ fun WorkbenchRoute(vm: WorkbenchViewModel, openHistory: () -> Unit, openSettings
     val st by vm.state.collectAsStateWithLifecycle()
     val homeSnack = remember { SnackbarHostState() }
     val canvasSnack = remember { SnackbarHostState() }
-    val ctx = LocalContext.current
+    val res = LocalResources.current
     val scope = rememberCoroutineScope()
     val reduce = LocalReduceMotion.current
     val reveal = remember { Animatable(if (st.graphOpen) 1f else 0f) }
@@ -50,7 +50,7 @@ fun WorkbenchRoute(vm: WorkbenchViewModel, openHistory: () -> Unit, openSettings
         val host = if (vm.state.value.graphOpen) canvasSnack else homeSnack
         scope.launch {
             host.currentSnackbarData?.dismiss()
-            val r = host.showSnackbar(ctx.getString(msg), action?.let { ctx.getString(it.label) },
+            val r = host.showSnackbar(res.getString(msg), action?.let { res.getString(it.label) },
                 duration = if (action != null) SnackbarDuration.Long else SnackbarDuration.Short)
             if (r == SnackbarResult.ActionPerformed && action == SnackAction.VIEW_HISTORY) openHistory()
         }
