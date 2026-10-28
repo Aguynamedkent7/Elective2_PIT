@@ -1,0 +1,15 @@
+<resources>
+    <color name="window_background">#F3F5F8</color>
+
+    <style name="Theme.NumLab" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <!-- System splash (core-splashscreen); the animated brand splash follows in Phase 6. -->
+    <style name="Theme.NumLab.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.NumLab</item>
+    </style>
+</resources>

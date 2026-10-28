@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">NumLab</string>
+    <string name="wordmark_num">Num</string>
+    <string name="wordmark_lab">Lab</string>
+    <string name="cd_logo">NumLab logo</string>
+    <string name="cd_history">History</string>
+    <string name="cd_back">Back</string>
+    <string name="module_roots">Roots</string>
+    <string name="module_interp">Interpolate</string>
+    <string name="graph">Graph</string>
+    <string name="graph_locked_caption">Type a function or tap an example to unlock the graph</string>
+    <string name="history_title">History</string>
+    <string name="history_empty">Run something and it will show up here</string>
+    <string name="canvas_placeholder">Graph canvas arrives in Phase 4</string>
+</resources>
