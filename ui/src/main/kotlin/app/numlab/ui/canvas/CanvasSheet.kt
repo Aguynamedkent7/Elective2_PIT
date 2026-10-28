@@ -42,8 +42,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -86,8 +88,10 @@ import kotlin.math.abs
 
 /** Sheet height in px with three anchors: peek, half, full (PLAN §6.3). */
 @Stable
-class SheetState(val peek: Float, val half: Float, val full: Float) {
+class SheetState(val peek: Float, val half: Float, val full: Float, anchor: MutableIntState) {
     val height = Animatable(0f)
+    /** Index into [snaps] the sheet last settled on, saved across rotation; -1 until the entry animation runs. */
+    var anchor by anchor
     val snaps get() = listOf(peek, half, full)
     fun nearest(v: Float, velocity: Float): Float = when {
         velocity < -1200 -> snaps.firstOrNull { it > v + 1 } ?: full // flung up
@@ -99,9 +103,15 @@ class SheetState(val peek: Float, val half: Float, val full: Float) {
 @Composable
 fun rememberSheet(maxHeight: Dp, density: Density): SheetState {
     val reduce = LocalReduceMotion.current
-    val s = with(density) { remember(maxHeight) { SheetState(218.dp.toPx(), maxHeight.toPx() * 0.56f, maxHeight.toPx() * 0.9f) } }
+    val anchor = rememberSaveable { mutableIntStateOf(-1) }
+    val s = with(density) { remember(maxHeight) { SheetState(218.dp.toPx(), maxHeight.toPx() * 0.56f, maxHeight.toPx() * 0.9f, anchor) } }
     LaunchedEffect(s) {
-        if (reduce) s.height.snapTo(s.peek) else s.height.animateTo(s.peek, tween(520, 240, Motion.EaseOutQuart))
+        when {
+            s.anchor >= 0 -> s.height.snapTo(s.snaps[s.anchor])
+            reduce -> s.height.snapTo(s.peek)
+            else -> s.height.animateTo(s.peek, tween(520, 240, Motion.EaseOutQuart))
+        }
+        s.anchor = maxOf(s.anchor, 0)
     }
     return s
 }
@@ -117,7 +127,7 @@ fun CanvasSheet(
     val scope = rememberCoroutineScope()
     val reduce = LocalReduceMotion.current
     var tab by rememberSaveable { mutableStateOf(Tab.INPUTS) }
-    fun snap(to: Float) = scope.launch { if (reduce) sheet.height.snapTo(to) else sheet.height.animateTo(to, tween(380, easing = Motion.EaseOutQuart)) }
+    fun snap(to: Float) = scope.launch { sheet.anchor = sheet.snaps.indexOf(to); if (reduce) sheet.height.snapTo(to) else sheet.height.animateTo(to, tween(380, easing = Motion.EaseOutQuart)) }
     val drag = rememberDraggableState { d -> scope.launch { sheet.height.snapTo((sheet.height.value - d).coerceIn(sheet.peek - 48f, sheet.full)) } }
     Surface(
         modifier.fillMaxWidth().layout { m, c ->

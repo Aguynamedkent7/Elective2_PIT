@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,8 +56,8 @@ import app.numlab.ui.workbench.solvedOf
 import kotlinx.coroutines.delay
 
 /** Iteration player state, hoisted so the sheet and the plot agree. */
-class Player(val last: Int) {
-    var k by mutableStateOf<Int?>(null)
+class Player(val last: Int, step: MutableState<Int?>) {
+    var k by step
     var playing by mutableStateOf(false)
     val index get() = (k ?: last).coerceIn(0, last)
     val stepMs get() = (2600 / maxOf(1, last)).coerceIn(150, 650)
@@ -77,7 +78,8 @@ fun CanvasScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState
     val solved = solvedOf(st)
     val rootRes = (st.rootOutcome as? Outcome.Ok)?.value?.takeIf { st.module == Module.ROOTS && solved != null }
     val interpRes = (st.interpOutcome as? Outcome.Ok)?.value?.takeIf { st.module == Module.INTERP && solved != null }
-    val player = remember(rootRes) { Player(maxOf(0, (rootRes?.rows?.size ?: 1) - 1)) }
+    val step = rememberSaveable(rootRes) { mutableStateOf<Int?>(null) } // survives rotation (script C)
+    val player = remember(rootRes) { Player(maxOf(0, (rootRes?.rows?.size ?: 1) - 1), step) }
     var autoplayed by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(player) {
         if (!autoplayed && rootRes != null && player.last > 0 && !reduce) { player.k = 0; player.playing = true }

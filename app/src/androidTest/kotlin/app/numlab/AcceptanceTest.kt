@@ -58,6 +58,19 @@ class AcceptanceTest {
     }
 
     @Test
+    fun scriptC_scrubSurvivesRecreate() {
+        home()
+        rule.onNodeWithText("x³ − x − 2").performClick()
+        waitFor("17 iterations · last change", substring = true)
+        rule.onNodeWithContentDescription("Show graph").performClick()
+        rule.waitUntil(15_000) { rule.onAllNodesWithText("17/17").fetchSemanticsNodes().isNotEmpty() }
+        repeat(12) { rule.onNodeWithContentDescription("Previous iteration").performClick() }
+        waitFor("5/17")
+        rule.activityRule.scenario.recreate()
+        waitFor("5/17")
+    }
+
+    @Test
     fun scriptB_interpolationExample() {
         home()
         rule.onNodeWithText("Interpolate").performClick()
