@@ -1,0 +1,9 @@
+<!-- In-app logo tile, from docs/assets/logo.svg (64-unit box). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp" android:height="64dp" android:viewportWidth="64" android:viewportHeight="64">
+    <path android:pathData="M18,0H46A18,18 0,0 1,64 18V46A18,18 0,0 1,46 64H18A18,18 0,0 1,0 46V18A18,18 0,0 1,18 0Z" android:fillColor="#2F5BEA"/>
+    <path android:pathData="M39.5,50.5H54.5" android:strokeColor="#FFFFFF" android:strokeWidth="3.4" android:strokeLineCap="round"/>
+    <path android:pathData="M14.5,13L13.5,50C17,47 20,41 22,35C23.5,30.5 26.5,31 30,30.3C34.5,29.5 37,26.5 38.3,21.5" android:strokeColor="#FFFFFF" android:strokeWidth="4.6" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <path android:pathData="M47.5,50.5L49,12L44.3,18.6" android:strokeColor="#FFFFFF" android:strokeWidth="4.6" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <path android:pathData="M26.1,30.3a3.9,3.9 0,1 0,7.8 0a3.9,3.9 0,1 0,-7.8 0Z" android:fillColor="#FF6A1F"/>
+</vector>

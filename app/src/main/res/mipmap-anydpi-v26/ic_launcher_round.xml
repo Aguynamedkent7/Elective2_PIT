@@ -1,0 +1,6 @@
+<!-- res/mipmap-anydpi-v26/ic_launcher.xml (and ic_launcher_round.xml). Background colour lives in res/values/ic_launcher_background.xml: <color name="ic_launcher_background">#2F5BEA</color> -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome"/>
+</adaptive-icon>

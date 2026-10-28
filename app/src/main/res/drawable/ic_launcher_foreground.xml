@@ -1,0 +1,8 @@
+<!-- res/drawable/ic_launcher_foreground.xml : adaptive icon foreground, 108dp canvas. The 64-unit logo is centred on the canvas and scaled 1.05 (everything stays inside the 66dp safe zone). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M59.56,74.27H75.31" android:strokeColor="#FFFFFF" android:strokeWidth="3.57" android:strokeLineCap="round"/>
+    <path android:pathData="M33.31,34.89L32.27,73.74C35.94,70.59 39.09,64.29 41.19,57.99C42.77,53.27 45.91,53.79 49.59,53.05C54.31,52.22 56.94,49.06 58.3,43.81" android:strokeColor="#FFFFFF" android:strokeWidth="4.83" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <path android:pathData="M67.97,74.27L69.54,33.84L64.6,40.77" android:strokeColor="#FFFFFF" android:strokeWidth="4.83" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <path android:pathData="M45.5,53.05a4.09,4.09 0,1 0,8.18,0a4.09,4.09 0,1 0,-8.18,0Z" android:fillColor="#FF6A1F"/>
+</vector>
