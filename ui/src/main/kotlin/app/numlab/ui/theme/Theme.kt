@@ -1,6 +1,10 @@
 package app.numlab.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -83,9 +87,22 @@ object NumLabTheme {
         @Composable @ReadOnlyComposable get() = LocalNumLabColors.current
 }
 
+/**
+ * App theme. [dynamic] (Android 12+) only swaps neutral surfaces for wallpaper-based ones; brand
+ * colours stay fixed (decision D6).
+ */
 @Composable
-fun NumLabTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val scheme: ColorScheme = if (dark) DarkScheme else LightScheme
+fun NumLabTheme(dark: Boolean = isSystemInDarkTheme(), dynamic: Boolean = false, content: @Composable () -> Unit) {
+    val base = if (dark) DarkScheme else LightScheme
+    val ctx = LocalContext.current
+    val scheme: ColorScheme = if (dynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val d = if (dark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
+        base.copy(background = d.background, surface = d.surface, surfaceVariant = d.surfaceVariant,
+            surfaceContainer = d.surfaceContainer, surfaceContainerHigh = d.surfaceContainerHigh, onSurfaceVariant = d.onSurfaceVariant,
+            outline = d.outlineVariant, outlineVariant = d.outlineVariant)
+    } else {
+        base
+    }
     CompositionLocalProvider(LocalNumLabColors provides if (dark) DarkExtra else LightExtra) {
         MaterialTheme(colorScheme = scheme, typography = NumLabTypography, content = content)
     }
