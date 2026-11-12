@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +38,13 @@ import app.numlab.ui.workbench.tolExp
 /** Settings sheet (PLAN §6.6). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsSheet(s: Settings, version: String, update: ((Settings) -> Settings) -> Unit, onDismiss: () -> Unit) {
+fun SettingsSheet(
+    s: Settings,
+    version: String,
+    update: ((Settings) -> Settings) -> Unit,
+    onAdPrivacy: (() -> Unit)? = null,
+    onDismiss: () -> Unit,
+) {
     val cs = MaterialTheme.colorScheme
     ModalBottomSheet(onDismiss, containerColor = cs.surface) {
         Column(
@@ -84,6 +91,7 @@ fun SettingsSheet(s: Settings, version: String, update: ((Settings) -> Settings)
                 SectionLabel(stringResource(R.string.settings_about))
                 Text(stringResource(R.string.about_version, version), style = MaterialTheme.typography.bodyMedium)
                 Text(stringResource(R.string.about_privacy), style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
+                onAdPrivacy?.let { TextButton(it) { Text(stringResource(R.string.ad_privacy_options)) } }
                 Text(stringResource(R.string.about_licences), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
             }
         }

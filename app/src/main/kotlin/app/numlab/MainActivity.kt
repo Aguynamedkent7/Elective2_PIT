@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.numlab.ads.Ads
 import app.numlab.domain.model.ThemeMode
 import app.numlab.ui.components.LocalHapticsEnabled
 import app.numlab.ui.motion.LocalReduceMotion
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition { settingsVm.settings.value == null }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Ads.start(this)
         setContent {
             val s by settingsVm.settings.collectAsStateWithLifecycle()
             val settings = s ?: return@setContent
@@ -48,16 +50,21 @@ class MainActivity : ComponentActivity() {
             var showSettings by rememberSaveable { mutableStateOf(false) }
             // 0 = brand splash, 1 = splash lifting away over Home, 2 = done. Cold start only.
             var splash by rememberSaveable { mutableIntStateOf(if (savedInstanceState == null) 0 else 2) }
+            val privacyOptionsRequired by Ads.privacyOptionsRequired.collectAsStateWithLifecycle()
             CompositionLocalProvider(
                 LocalReduceMotion provides rememberReduceMotion(settings.motion),
                 LocalHapticsEnabled provides settings.haptics,
             ) {
                 NumLabTheme(dark, settings.dynamicColor) {
                     Surface(color = MaterialTheme.colorScheme.background) {
-                        if (splash > 0) NumLabNavGraph(workbench, settings.decimals) { showSettings = true }
+                        // The splash and the settings sheet both cover the banner, so it pauses under them.
+                        if (splash > 0) NumLabNavGraph(workbench, settings.decimals, adsActive = splash == 2 && !showSettings) { showSettings = true }
                     }
                     if (showSettings) {
-                        SettingsSheet(settings, BuildConfig.VERSION_NAME, settingsVm::update) { showSettings = false }
+                        SettingsSheet(
+                            settings, BuildConfig.VERSION_NAME, settingsVm::update,
+                            onAdPrivacy = if (privacyOptionsRequired) ({ Ads.showPrivacyOptions(this@MainActivity) }) else null,
+                        ) { showSettings = false }
                     }
                     if (splash < 2) Splash(LocalReduceMotion.current, onExitStart = { splash = 1 }, onDone = { splash = 2 })
                 }

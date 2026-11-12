@@ -5,13 +5,13 @@
 # NumLab
 
 **A numerical-analysis workbench for Android.**<br>
-Find roots, interpolate data, and see every iteration step by step. Works fully offline.
+Find roots, interpolate data, and see every iteration step by step. Every feature works offline.
 
 [![Release](https://img.shields.io/github/v/release/Aguynamedkent7/Elective2_PIT?label=release&color=2f5bea)](https://github.com/Aguynamedkent7/Elective2_PIT/releases/latest)
 ![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3ddc84?logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7f52ff?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285f4?logo=jetpackcompose&logoColor=white)
-![Offline](https://img.shields.io/badge/network-none-555)
+![Offline](https://img.shields.io/badge/features-offline-555)
 
 <br>
 
@@ -106,13 +106,13 @@ Single-activity app built with Jetpack Compose and Material 3. It follows MVVM w
 | `:domain` | Pure Kotlin/JVM, no Android imports. Expression parser (hand-written recursive descent), root solvers, interpolation, number formatting, exports. |
 | `:data` | Room database for history, DataStore for settings. |
 | `:ui` | Compose screens, the custom `Canvas` plot, motion and theming. |
-| `:app` | Application entry point, Hilt wiring, navigation. |
+| `:app` | Application entry point, Hilt wiring, navigation, AdMob banner and consent. |
 
 Solvers run on `Dispatchers.Default`. A new input cancels the previous calculation.
 
 ## Privacy
 
-NumLab has **no `INTERNET` permission**, so it can't send anything off your device. There are no analytics, ads or accounts. History is stored only on your device.
+Your calculations and history stay on your device. NumLab shows banner ads from **Google AdMob**, which is the only part of the app that uses the `INTERNET` permission. AdMob may collect device data such as the advertising ID, and asks for consent where the law requires it. NumLab has no accounts or analytics of its own.
 
 ## Project documents
 
