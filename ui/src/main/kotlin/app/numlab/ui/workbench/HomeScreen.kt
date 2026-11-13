@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -34,9 +36,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -64,9 +71,11 @@ class HomeActions(
 
 /** Input-first Home (PLAN §6.2): header, module switch, inputs card, result card, Graph/Save bar. */
 @Composable
-fun HomeScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState) {
+fun HomeScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState, adBanner: @Composable () -> Unit = {}) {
     val cs = MaterialTheme.colorScheme
     val reduce = LocalReduceMotion.current
+    val density = LocalDensity.current
+    var adHeight by remember { mutableStateOf(0.dp) }
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             Header(st, a, Modifier.riseIn(0))
@@ -106,12 +115,17 @@ fun HomeScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState) 
                             IterationsPane(err.rows, st.root.tol.toDoubleOrNull() ?: 0.0, st.decimals, null, null, maxHeight = 260.dp)
                         }
                     }
-                    // Clears the pinned Graph/Save bar, which grows with font scale (PLAN §6.7).
-                    Spacer(Modifier.height(170.dp * maxOf(1f, LocalDensity.current.fontScale * 0.8f)))
+                    // Clears the pinned Graph/Save bar, which grows with font scale (PLAN §6.7), and the ad under it.
+                    Spacer(Modifier.height(170.dp * maxOf(1f, density.fontScale * 0.8f) + adHeight))
                 }
             }
         }
-        BottomBar(st, a, snackbar, Modifier.align(Alignment.BottomCenter))
+        Column(Modifier.align(Alignment.BottomCenter)) {
+            BottomBar(st, a, snackbar)
+            Column(Modifier.fillMaxWidth().background(cs.background).navigationBarsPadding()) {
+                Box(Modifier.onSizeChanged { adHeight = with(density) { it.height.toDp() } }) { adBanner() }
+            }
+        }
     }
 }
 

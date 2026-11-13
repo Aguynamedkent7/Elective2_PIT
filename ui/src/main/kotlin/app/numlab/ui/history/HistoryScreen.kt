@@ -93,7 +93,7 @@ fun whenLabel(item: HistoryItem): String {
 }
 
 @Composable
-fun HistoryScreen(vm: HistoryViewModel, decimals: Int, nav: HistoryNav) {
+fun HistoryScreen(vm: HistoryViewModel, decimals: Int, nav: HistoryNav, adBanner: @Composable () -> Unit = {}) {
     val st by vm.state.collectAsStateWithLifecycle()
     val cs = MaterialTheme.colorScheme
     val snackbar = remember { SnackbarHostState() }
@@ -112,38 +112,41 @@ fun HistoryScreen(vm: HistoryViewModel, decimals: Int, nav: HistoryNav) {
             }
         }
     }
-    Box(Modifier.fillMaxSize().background(cs.background)) {
-        LazyColumn(
-            Modifier.fillMaxSize(), rememberLazyListState(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 40.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item(key = "header") { Header(st, vm, nav) }
-            if (st.loaded && st.cards.isEmpty()) item(key = "empty") { Empty(st.all == 0) }
-            itemsIndexed(st.cards, key = { _, c -> "${c.item.id}/$epoch" }) { i, card ->
-                val dismiss = rememberSwipeToDismissBoxState()
-                SwipeToDismissBox(
-                    dismiss,
-                    backgroundContent = {
-                        Box(Modifier.fillMaxSize().background(NumLabTheme.colors.bad.copy(alpha = if (dismiss.dismissDirection == SwipeToDismissBoxValue.EndToStart) 1f else 0f),
-                            RoundedCornerShape(28.dp)).padding(end = 28.dp), contentAlignment = Alignment.CenterEnd) {
-                            Icon(Icons.Outlined.DeleteOutline, null, tint = Color.White)
-                        }
-                    },
-                    modifier = Modifier.widthIn(max = 640.dp).animateItem().riseIn(minOf(i, 6), staggerMs = 40, rise = 16f),
-                    enableDismissFromStartToEnd = false,
-                    onDismiss = { delete(card.item) },
-                ) {
-                    HistoryCard(card, whenLabel(card.item), decimals, CardActions(
-                        pin = { vm.togglePin(card.item) },
-                        open = nav.openInputs,
-                        openGraph = nav.openGraph,
-                        menu = { solved -> CardMenu(card, solved, nav, vm, delete, toast, ex) },
-                    ))
+    Column(Modifier.fillMaxSize().background(cs.background)) {
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            LazyColumn(
+                Modifier.fillMaxSize(), rememberLazyListState(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                item(key = "header") { Header(st, vm, nav) }
+                if (st.loaded && st.cards.isEmpty()) item(key = "empty") { Empty(st.all == 0) }
+                itemsIndexed(st.cards, key = { _, c -> "${c.item.id}/$epoch" }) { i, card ->
+                    val dismiss = rememberSwipeToDismissBoxState()
+                    SwipeToDismissBox(
+                        dismiss,
+                        backgroundContent = {
+                            Box(Modifier.fillMaxSize().background(NumLabTheme.colors.bad.copy(alpha = if (dismiss.dismissDirection == SwipeToDismissBoxValue.EndToStart) 1f else 0f),
+                                RoundedCornerShape(28.dp)).padding(end = 28.dp), contentAlignment = Alignment.CenterEnd) {
+                                Icon(Icons.Outlined.DeleteOutline, null, tint = Color.White)
+                            }
+                        },
+                        modifier = Modifier.widthIn(max = 640.dp).animateItem().riseIn(minOf(i, 6), staggerMs = 40, rise = 16f),
+                        enableDismissFromStartToEnd = false,
+                        onDismiss = { delete(card.item) },
+                    ) {
+                        HistoryCard(card, whenLabel(card.item), decimals, CardActions(
+                            pin = { vm.togglePin(card.item) },
+                            open = nav.openInputs,
+                            openGraph = nav.openGraph,
+                            menu = { solved -> CardMenu(card, solved, nav, vm, delete, toast, ex) },
+                        ))
+                    }
                 }
             }
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding())
+        Column(Modifier.fillMaxWidth().navigationBarsPadding()) { adBanner() }
     }
 }
 
