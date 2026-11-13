@@ -84,6 +84,8 @@ fun explainStep(res: RootResult, idx: Int): Working {
             lines += "Keep the half with the sign change" to
                 if (r.fx == 0.0) {
                     "f(c) = 0, so c is an exact root"
+                } else if (prod == 0.0) {
+                    "f(a) = 0, so a is the root and b ← c"
                 } else {
                     "f(a)·f(c) = ${fmtE(prod)} ${if (prod < 0) "< 0, so b ← c" else "> 0, so a ← c"}"
                 }

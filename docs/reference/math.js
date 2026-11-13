@@ -241,7 +241,7 @@ export function solveRoot(inp, opts = {}) {
           converged = true;
           break;
         }
-        if (flo * fc < 0) hi = x;
+        if (flo === 0 || flo * fc < 0) hi = x;
         else {
           lo = x;
           flo = fc;
@@ -501,7 +501,7 @@ export function explainStep(res, idx) {
     const fa = f(r.lo);
     L.push(['Midpoint', `c = (a + b) / 2 = (${fmt(r.lo, d)} + ${fmt(r.hi, d)}) / 2 = ${fmt(r.x, d)}`]);
     L.push(['Evaluate', `f(c) = ${fmt(r.fx, d)}`]);
-    L.push(['Keep the half with the sign change', r.fx === 0 ? 'f(c) = 0, so c is an exact root' : `f(a)·f(c) = ${fmtE(fa * r.fx)} ${fa * r.fx < 0 ? '< 0, so b ← c' : '> 0, so a ← c'}`]);
+    L.push(['Keep the half with the sign change', r.fx === 0 ? 'f(c) = 0, so c is an exact root' : fa === 0 ? 'f(a) = 0, so a is the root and b ← c' : `f(a)·f(c) = ${fmtE(fa * r.fx)} ${fa * r.fx < 0 ? '< 0, so b ← c' : '> 0, so a ← c'}`]);
   } else if (res.method === 'newton') {
     if (idx === 0) L.push(['Starting guess', `x₀ = ${fmt(r.x, d)}`]);
     else {
