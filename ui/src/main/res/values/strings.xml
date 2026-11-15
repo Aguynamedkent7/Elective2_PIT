@@ -182,4 +182,5 @@
 
     <string name="splash_skip">Tap to skip</string>
     <string name="canvas_title_points">%1$d points</string>
+    <string name="settings_defaults_hint">Also updates the current inputs, unless you\'ve typed your own value.</string>
 </resources>

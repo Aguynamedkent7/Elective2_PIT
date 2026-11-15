@@ -36,12 +36,13 @@ import org.junit.Test
 class WorkbenchViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val history = FakeHistory()
+    private val fakeSettings = FakeSettings()
     private lateinit var vm: WorkbenchViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = WorkbenchViewModel(history, FakeSettings(), SavedStateHandle(), dispatcher)
+        vm = WorkbenchViewModel(history, fakeSettings, SavedStateHandle(), dispatcher)
     }
 
     @After
@@ -147,5 +148,16 @@ class WorkbenchViewModelTest {
         settle()
         vm.save(true); advanceUntilIdle()
         assertTrue(history.items.value.isEmpty())
+    }
+
+    // #34: changing a default in Settings updates inputs the user hasn't touched, and keeps the ones they have.
+    @Test
+    fun newDefaultsFollowUntouchedInputsOnly() = runTest(dispatcher) {
+        settle()
+        vm.setRoot { it.copy(maxIter = "77") }          // user typed their own max-iter
+        fakeSettings.update { it.copy(defaultTolerance = "1e-9", defaultMaxIter = "200") }
+        settle()
+        assertEquals("1e-9", st.root.tol)                // untouched -> follows the new default
+        assertEquals("77", st.root.maxIter)              // user's own value is kept
     }
 }

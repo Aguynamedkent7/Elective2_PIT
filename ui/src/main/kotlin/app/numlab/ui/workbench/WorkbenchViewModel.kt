@@ -27,6 +27,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -86,6 +88,22 @@ class WorkbenchViewModel @Inject constructor(
         s.launch { history.observe().collect { list -> _state.update { it.copy(historyCount = list.size) } } }
         s.launch { settings.settings.collect { st -> _state.update { it.copy(decimals = st.decimals) } } }
         s.launch { applyStartupDefaults() }
+        // #34: when the default tolerance / max-iter change in Settings, carry the new value into the
+        // current inputs, but only where the user hasn't typed their own value (input == old default).
+        // Works on a fresh start, with "Restore session" on, and after a process-death restore.
+        s.launch {
+            settings.settings.withPrevious().collect { (old, new) ->
+                val r = _state.value.root
+                val followTol = old.defaultTolerance != new.defaultTolerance && sameNumber(r.tol, old.defaultTolerance)
+                val followIter = old.defaultMaxIter != new.defaultMaxIter && sameNumber(r.maxIter, old.defaultMaxIter)
+                if (followTol || followIter) setRoot {
+                    it.copy(
+                        tol = if (followTol) new.defaultTolerance else it.tol,
+                        maxIter = if (followIter) new.defaultMaxIter else it.maxIter,
+                    )
+                }
+            }
+        }
         s.launch {
             _state.map { it.root }.distinctUntilChanged().debounce(SOLVE_DEBOUNCE_MS).collectLatest { r ->
                 val o = if (r.fx.isBlank()) Outcome.Idle else withContext(compute) {
@@ -297,3 +315,23 @@ class WorkbenchViewModel @Inject constructor(
     }
 }
 
+/** #34: true when two inputs mean the same number ("1e-6" == "0.000001"); falls back to plain text. */
+private fun sameNumber(a: Any?, b: Any?): Boolean {
+    val x = a?.toString()?.trim().orEmpty()
+    val y = b?.toString()?.trim().orEmpty()
+    val dx = x.toDoubleOrNull()
+    val dy = y.toDoubleOrNull()
+    return if (dx != null && dy != null) dx == dy else x == y
+}
+
+/** #34: emits (previous, current) for every new value after the first. */
+private fun <T> Flow<T>.withPrevious(): Flow<Pair<T, T>> = flow {
+    var prev: Any? = NoValue
+    collect { v ->
+        @Suppress("UNCHECKED_CAST")
+        if (prev !== NoValue) emit((prev as T) to v)
+        prev = v
+    }
+}
+
+private object NoValue
