@@ -11,7 +11,7 @@ android {
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 
-kotlin { jvmToolchain(17) }
+kotlin { jvmToolchain(21) }
 
 room { schemaDirectory("$projectDir/schemas") }
 

@@ -44,7 +44,7 @@ Rules of engagement:
 5. Light / dark / system theme, responsive on phones and tablets (foldables: keep content ≤ 640dp wide, centred).
 
 ### Out of scope for v1 (do not build)
-Other root methods (false position, fixed-point), other interpolation (splines, Hermite), symbolic differentiation, accounts/sync, ads, analytics, in-app purchases. Keep seams so these can be added (section 3.3).
+Other root methods (false position, fixed-point), other interpolation (splines, Hermite), symbolic differentiation, accounts/sync, analytics, in-app purchases. (AdMob banners were added later; see `docs/DECISIONS.md`.) Keep seams so these can be added (section 3.3).
 
 ### Product rules that shape the UI
 - **Input first.** The home screen is just inputs. The graph is *not* shown until there is a valid input *and* the user presses **Graph**. Until then the Graph button is locked with a caption: "Type a function or tap an example to unlock the graph".
@@ -323,7 +323,7 @@ Read `Settings.Global.ANIMATOR_DURATION_SCALE == 0` and the in-app override. In 
 - Output: `./gradlew :app:bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`. Version name from the catalog, version code from a single integer in `gradle.properties`.
 - Pre-launch checks: lint clean (no errors), `strict mode` clean in debug, ANR/crash-free on API 26, 30, 34 and latest, tablet and foldable emulator, TalkBack pass, font scale 200 %, dark/light, RTL pseudo-locale, bundle size < 15 MB.
 - Play listing assets are out of scope; do generate a 512 px icon from `logo.svg`.
-- Privacy: no network permission at all (`INTERNET` must not appear in the manifest). Data safety form: "no data collected".
+- Privacy: `INTERNET` is used only by the AdMob SDK; app features never need the network. Data safety form: declare the data AdMob collects (`docs/RELEASE.md`).
 
 ---
 
@@ -420,6 +420,6 @@ Signing, `bundleRelease`, smoke test of the release build on device, deliver `ap
 ## 14. Definition of done
 - All acceptance scripts pass on a physical device (API ≥ 26) and a tablet emulator.
 - `golden.json` passes 100 %; coverage on `:domain` ≥ 90 % lines.
-- Lint clean; no `INTERNET` permission; no debug logging of user input in release.
+- Lint clean; `INTERNET` used only by AdMob; no debug logging of user input in release.
 - Release `.aab` signed, installs via `bundletool`, cold start < 700 ms on mid-range hardware, APK size under budget.
 - `docs/DECISIONS.md` lists every deviation from this plan with the reason.

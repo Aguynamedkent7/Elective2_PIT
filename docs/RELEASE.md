@@ -22,6 +22,22 @@ Without that file the release build is produced **unsigned**. Back up the `.jks`
 passwords somewhere safe; enrol in **Play App Signing** on first upload so Google holds the app
 signing key and this is only the upload key.
 
+## AdMob IDs
+Without these properties, release builds use Google's test IDs and **earn nothing**. Create the app
+and a banner ad unit in the [AdMob console](https://apps.admob.com), then add to `gradle.properties`
+or `~/.gradle/gradle.properties`:
+
+```properties
+numlab.admob.appId=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+numlab.admob.bannerId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+```
+
+Debug builds ignore them and always show test ads. Never tap real ads on your own device, because
+AdMob treats that as invalid traffic.
+
+For EEA/UK users, create a GDPR message under **Privacy & messaging** in the AdMob console. The app
+then shows it through UMP on launch and offers "Ad privacy choices" in Settings.
+
 ## Version
 - `numlab.versionCode` (single integer) and `numlab.versionName` in `gradle.properties`.
   Bump `versionCode` for every upload.
@@ -49,4 +65,7 @@ then `bundletool install-apks --apks=numlab.apks`.
 
 ## Store assets
 - 512 px icon: `docs/release/play-icon-512.png` (full-bleed, rendered from `docs/assets/logo.svg`).
-- Data safety: **no data collected or shared**. The manifest has no `INTERNET` permission.
+- Data safety: declare what the Google Mobile Ads SDK collects and shares (see Google's
+  [data disclosure guide](https://developers.google.com/admob/android/privacy/play-data-disclosure)).
+  In Play Console, also set **Contains ads** to yes and answer **Advertising ID** with yes.
+- Privacy policy: Play requires a public URL for apps with ads. It must mention AdMob.

@@ -1,6 +1,6 @@
 # NumLab — project instructions for Claude Code
 
-Native Android (Kotlin, Jetpack Compose, Material 3) numerical-analysis app. Offline only.
+Native Android (Kotlin, Jetpack Compose, Material 3) numerical-analysis app. All features work offline; only AdMob banners use the network.
 
 ## Source of truth
 - `PLAN.md` — scope, architecture, phases, gates. Read it before any task.
@@ -11,7 +11,7 @@ Native Android (Kotlin, Jetpack Compose, Material 3) numerical-analysis app. Off
 - Modules: `:app → :ui → :domain`, `:app → :data → :domain`. `:domain` is pure Kotlin/JVM (no Android imports).
 - MVVM + unidirectional data flow: one immutable `UiState` per screen, `StateFlow`, events in, effects out. Use cases are single-purpose classes.
 - Solvers and sampling run on `Dispatchers.Default`; cancel on new input (`collectLatest`).
-- No `INTERNET` permission. No analytics. No `eval`/script engines.
+- `INTERNET` is for the AdMob SDK only (`app/.../ads/`); app features must never need the network. `:ui` and `:domain` must not depend on the ads SDK. No analytics. No `eval`/script engines.
 - All strings in `strings.xml`. All numbers through the shared formatter (never `%e`).
 
 ## Commands

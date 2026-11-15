@@ -122,7 +122,7 @@ private fun relCell(r: RootRow, tol: Double): Cell {
 fun rootTable(tol: Double, rows: List<RootRow>, dp: Int): Pair<List<Col>, List<List<Cell>>> =
     listOf(Col("Iter", 52.dp, start = true), Col("xₙ", 112.dp), Col("f(xₙ)", 92.dp), Col("|xₙ − xₙ₋₁|", 104.dp),
         Col("Rel. err %", 104.dp)) to rows.map { r ->
-        listOf(Cell(r.n.toString()), Cell(Fmt.toFixed(r.x, maxOf(dp, 4))), Cell(fmtE(r.fx)),
+        listOf(Cell(r.n.toString()), Cell(fmt(r.x, maxOf(dp, 4))), Cell(fmtE(r.fx)),
             Cell(r.abs?.let(::fmtE) ?: "—"), relCell(r, tol))
     }
 

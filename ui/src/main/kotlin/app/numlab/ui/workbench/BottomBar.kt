@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -83,7 +82,7 @@ fun BottomBar(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState, m
         modifier.fillMaxWidth()
             // Opaque from the end of the top padding down, so a caption wrapped by large fonts never sits on content.
             .background(Brush.verticalGradient(listOf(cs.background.copy(alpha = 0f), cs.background), endY = with(LocalDensity.current) { 40.dp.toPx() }))
-            .navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

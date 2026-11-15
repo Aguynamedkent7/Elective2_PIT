@@ -7,6 +7,7 @@ const rootCases = [
   ['bisection cos(x)-x', { ...R, fx: 'cos(x) - x', a: '0', b: '1' }], ['newton cos(x)-x tol 1e-8', { ...R, method: 'newton', fx: 'cos(x) - x', x0: '1', tol: '1e-8' }],
   ['secant x^2-2', { ...R, method: 'secant', fx: 'x^2 - 2', s0: '1', s1: '2', tol: '1e-6' }], ['bisection exp(x)-3x', { ...R, fx: 'exp(x) - 3x', a: '0', b: '1' }],
   ['bisection ln(x)+x-2', { ...R, fx: 'ln(x) + x - 2', a: '1', b: '2' }], ['bisection hits iteration limit', { ...R, maxIter: '5' }],
+  ['bisection root at a', { ...R, fx: 'x', a: '0', b: '1' }],
   ['error: same sign', { ...R, a: '2', b: '3' }], ['error: a>=b', { ...R, a: '2', b: '1' }], ['error: newton flat slope', { ...R, method: 'newton', fx: 'x^2+1', x0: '0' }],
   ['error: secant equal values', { ...R, method: 'secant', fx: '5', s0: '1', s1: '2' }], ['error: empty fx', { ...R, fx: '' }], ['error: tol <= 0', { ...R, tol: '0' }],
 ];

@@ -11,6 +11,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import app.numlab.ads.AdBanner
 import app.numlab.ui.history.HistoryNav
 import app.numlab.ui.history.HistoryScreen
 import app.numlab.ui.motion.LocalReduceMotion
@@ -20,7 +21,7 @@ import app.numlab.ui.workbench.WorkbenchViewModel
 
 /** `home` (graph canvas is an overlay there) and `history` as a slide-up sheet (PLAN §6.1, §7.3). */
 @Composable
-fun NumLabNavGraph(workbench: WorkbenchViewModel, decimals: Int, openSettings: () -> Unit) {
+fun NumLabNavGraph(workbench: WorkbenchViewModel, decimals: Int, adsActive: Boolean, openSettings: () -> Unit) {
     val nav = rememberNavController()
     val reduce = LocalReduceMotion.current
     NavHost(
@@ -30,13 +31,17 @@ fun NumLabNavGraph(workbench: WorkbenchViewModel, decimals: Int, openSettings: (
         popEnterTransition = { fadeIn(tween(if (reduce) 120 else 0)) },
         popExitTransition = { if (reduce) fadeOut(tween(120)) else slideOutVertically(tween(380, easing = Motion.Accelerate)) { it } },
     ) {
-        composable("home") { WorkbenchRoute(workbench, { nav.navigate("history") { launchSingleTop = true } }, openSettings) }
+        composable("home") {
+            WorkbenchRoute(workbench, { nav.navigate("history") { launchSingleTop = true } }, openSettings) { visible ->
+                AdBanner(active = visible && adsActive)
+            }
+        }
         composable("history") {
             HistoryScreen(hiltViewModel(), decimals, HistoryNav(
                 back = { nav.popBackStack() },
                 openInputs = { workbench.load(it); nav.popBackStack() },
                 openGraph = { workbench.load(it); nav.popBackStack(); workbench.openGraphWhenReady() },
-            ))
+            )) { AdBanner(active = adsActive) }
         }
     }
 }
