@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,11 +33,19 @@ fun NumLabNavGraph(workbench: WorkbenchViewModel, decimals: Int, openSettings: (
         popExitTransition = { if (reduce) fadeOut(tween(120)) else slideOutVertically(tween(380, easing = Motion.Accelerate)) { it } },
     ) {
         composable("home") { WorkbenchRoute(workbench, { nav.navigate("history") { launchSingleTop = true } }, openSettings) }
-        composable("history") {
+        composable("history") { entry ->
+            // Only the first History action per visit runs; taps during the 380 ms exit animation are ignored.
+            val handled = remember(entry) { mutableStateOf(false) }
+            fun once(before: () -> Unit = {}, after: () -> Unit = {}) {
+                if (handled.value) return
+                handled.value = true
+                before()
+                if (nav.popBackStack("home", inclusive = false)) after() else handled.value = false
+            }
             HistoryScreen(hiltViewModel(), decimals, HistoryNav(
-                back = { nav.popBackStack() },
-                openInputs = { workbench.load(it); nav.popBackStack() },
-                openGraph = { workbench.load(it); nav.popBackStack(); workbench.openGraphWhenReady() },
+                back = { once() },
+                openInputs = { input -> once(before = { workbench.load(input) }) },
+                openGraph = { input -> once(before = { workbench.load(input) }, after = { workbench.openGraphWhenReady() }) },
             ))
         }
     }
