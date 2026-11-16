@@ -110,6 +110,7 @@ fun explainStep(res: RootResult, idx: Int): Working {
     if (r.abs != null) lines += "Change" to "|xₙ − xₙ₋₁| = ${fmtE(r.abs)}"
     val note = when {
         idx != res.rows.lastIndex -> null
+        r.fx == 0.0 -> "Stopped here because f(x) is exactly 0."
         res.converged -> "Stopped here because the change ${fmtE(r.abs)} is below the tolerance ${jsNum(res.tol)}."
         else -> "Stopped at the iteration limit before the change dropped below the tolerance."
     }

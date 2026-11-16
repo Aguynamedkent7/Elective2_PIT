@@ -101,4 +101,21 @@ class ExtrasTest {
         assertEquals(1L, DeleteRunUseCase(repo)(1)?.id)
         assertEquals(Draft(null, null, false), Draft(null, null, false))
     }
+
+    @Test
+    fun `an exact root is reported as such, not as a small change`() {
+        val explain = ExplainStepUseCase()
+
+        // Bisection, f(x) = x on [-1, 1]: the first midpoint is 0 and there is no previous change to report.
+        val bisection = SolveRootUseCase()(RootInput(RootMethod.BISECTION, "x", "-1", "1")).getOrThrow()
+        assertEquals(0.0, bisection.fRoot)
+        assertEquals(null, bisection.rows.last().abs)
+        assertEquals("Stopped here because f(x) is exactly 0.", explain(bisection, bisection.rows.lastIndex).note)
+
+        // Bisection, f(x) = x - 3 on [0, 4]: the second midpoint is the root while the change is still 1.
+        val bisection2 = SolveRootUseCase()(RootInput(RootMethod.BISECTION, "x - 3", "0", "4")).getOrThrow()
+        assertEquals(0.0, bisection2.fRoot)
+        assertEquals(1.0, bisection2.rows.last().abs)
+        assertEquals("Stopped here because f(x) is exactly 0.", explain(bisection2, bisection2.rows.lastIndex).note)
+    }
 }
