@@ -118,14 +118,16 @@ fun Splash(reduce: Boolean, onExitStart: () -> Unit, onDone: () -> Unit) {
 @Composable
 private fun Wordmark(t: Float) {
     val ink = MaterialTheme.colorScheme.onBackground
+    val num = stringResource(R.string.wordmark_num)
+    val word = num + stringResource(R.string.wordmark_lab)
     Row {
-        "NumLab".forEachIndexed { i, c ->
+        word.forEachIndexed { i, c ->
             val p = win(t, 1.9f + 0.045f * i, 0.55f, Motion.Decelerate)
             Text(
                 c.toString(), Modifier.graphicsLayer { alpha = p; translationY = (1 - p) * 20.dp.toPx() },
                 fontFamily = Bricolage, fontSize = 36.sp,
-                fontWeight = if (i >= 3) FontWeight.Medium else FontWeight.ExtraBold,
-                color = if (i >= 3) ink.copy(alpha = 0.8f) else ink,
+                fontWeight = if (i >= num.length) FontWeight.Medium else FontWeight.ExtraBold,
+                color = if (i >= num.length) ink.copy(alpha = 0.8f) else ink,
             )
         }
     }

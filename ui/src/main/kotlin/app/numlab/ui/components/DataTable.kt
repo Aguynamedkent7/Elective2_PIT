@@ -1,5 +1,6 @@
 package app.numlab.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -34,6 +36,7 @@ import app.numlab.domain.format.Fmt.fmtE
 import app.numlab.domain.interp.InterpResult
 import app.numlab.domain.roots.RootResult
 import app.numlab.domain.roots.RootRow
+import app.numlab.ui.R
 import app.numlab.ui.theme.MonoStyle
 import app.numlab.ui.theme.NumLabTheme
 
@@ -41,7 +44,10 @@ enum class Tone { NONE, GOOD, WARN, ACCENT }
 
 data class Cell(val text: String, val tone: Tone = Tone.NONE)
 
-data class Col(val header: String, val width: Dp, val start: Boolean = false)
+data class Col(@StringRes val header: Int, val width: Dp, val start: Boolean = false, val headerArg: Int? = null)
+
+@Composable
+private fun Col.headerText() = if (headerArg == null) stringResource(header) else stringResource(header, headerArg)
 
 /**
  * Zebra table with a sticky header (PLAN §8: lazy, so 10 000 rows are fine).
@@ -71,7 +77,7 @@ fun DataTable(
                 stickyHeader {
                     Row(Modifier.background(cs.surfaceVariant)) {
                         fit.forEach { c ->
-                            Text(c.header.uppercase(), Modifier.width(c.width).padding(horizontal = 8.dp, vertical = 10.dp),
+                            Text(c.headerText().uppercase(), Modifier.width(c.width).padding(horizontal = 8.dp, vertical = 10.dp),
                                 style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant, fontWeight = FontWeight.SemiBold,
                                 textAlign = if (c.start) TextAlign.Start else TextAlign.End)
                         }
@@ -120,22 +126,29 @@ private fun relCell(r: RootRow, tol: Double): Cell {
 }
 
 fun rootTable(tol: Double, rows: List<RootRow>, dp: Int): Pair<List<Col>, List<List<Cell>>> =
-    listOf(Col("Iter", 52.dp, start = true), Col("xₙ", 112.dp), Col("f(xₙ)", 92.dp), Col("|xₙ − xₙ₋₁|", 104.dp),
-        Col("Rel. err %", 104.dp)) to rows.map { r ->
+    listOf(Col(R.string.col_iter, 52.dp, start = true), Col(R.string.col_xn, 112.dp), Col(R.string.col_fxn, 92.dp),
+        Col(R.string.col_abs_change, 104.dp), Col(R.string.col_rel_err, 104.dp)) to rows.map { r ->
         listOf(Cell(r.n.toString()), Cell(fmt(r.x, maxOf(dp, 4))), Cell(fmtE(r.fx)),
             Cell(r.abs?.let(::fmtE) ?: "—"), relCell(r, tol))
     }
 
 fun basisTable(res: InterpResult, dp: Int): Pair<List<Col>, List<List<Cell>>> =
-    listOf(Col("i", 40.dp, start = true), Col("xᵢ", 84.dp), Col("yᵢ", 84.dp), Col("Lᵢ(x)", 104.dp), Col("yᵢ·Lᵢ", 104.dp)) to
+    listOf(Col(R.string.col_i, 40.dp, start = true), Col(R.string.col_xi, 84.dp), Col(R.string.col_yi, 84.dp),
+        Col(R.string.col_basis, 104.dp), Col(R.string.col_term, 104.dp)) to
         res.basis.orEmpty().map { b ->
             listOf(Cell(b.i.toString()), Cell(fmt(b.x, 4)), Cell(fmt(b.y, 4)), Cell(fmt(b.l, dp)), Cell(fmt(b.term, dp)))
         }
 
-private fun ddName(j: Int) = when (j) { 0 -> "f[xᵢ]"; 1 -> "1st"; 2 -> "2nd"; 3 -> "3rd"; else -> "${j}th" }
+private fun ddCol(j: Int) = when (j) {
+    0 -> Col(R.string.col_dd_0, 100.dp)
+    1 -> Col(R.string.col_dd_1, 100.dp)
+    2 -> Col(R.string.col_dd_2, 100.dp)
+    3 -> Col(R.string.col_dd_3, 100.dp)
+    else -> Col(R.string.col_dd_n, 100.dp, headerArg = j)
+}
 
 fun ddTable(res: InterpResult): Pair<List<Col>, List<List<Cell>>> =
-    (listOf(Col("xᵢ", 72.dp, start = true)) + res.dd.indices.map { Col(ddName(it), 100.dp) }) to
+    (listOf(Col(R.string.col_xi, 72.dp, start = true)) + res.dd.indices.map(::ddCol)) to
         res.points.indices.map { i ->
             listOf(Cell(fmt(res.points[i].x, 4))) + res.dd.map { col ->
                 if (i < col.size) Cell(fmt(col[i], 5), if (i == 0) Tone.ACCENT else Tone.NONE) else Cell("")

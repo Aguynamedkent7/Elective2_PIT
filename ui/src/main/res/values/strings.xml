@@ -24,6 +24,8 @@
     <string name="cd_more">More actions</string>
     <string name="cd_iteration_slider">Iteration</string>
     <string name="cd_eval_slider">Evaluate at x</string>
+    <string name="cd_decrease">Decrease %1$s</string>
+    <string name="cd_increase">Increase %1$s</string>
 
     <string name="module_roots">Roots</string>
     <string name="module_interp">Interpolate</string>
@@ -89,6 +91,21 @@
     <string name="iteration_n">Iteration %1$d</string>
     <string name="p_expanded">P(x) expanded</string>
     <string name="newton_form">Newton form</string>
+    <string name="col_iter">Iter</string>
+    <string name="col_xn">xₙ</string>
+    <string name="col_fxn">f(xₙ)</string>
+    <string name="col_abs_change">|xₙ − xₙ₋₁|</string>
+    <string name="col_rel_err">Rel. err %</string>
+    <string name="col_i">i</string>
+    <string name="col_xi">xᵢ</string>
+    <string name="col_yi">yᵢ</string>
+    <string name="col_basis">Lᵢ(x)</string>
+    <string name="col_term">yᵢ·Lᵢ</string>
+    <string name="col_dd_0">f[xᵢ]</string>
+    <string name="col_dd_1">1st</string>
+    <string name="col_dd_2">2nd</string>
+    <string name="col_dd_3">3rd</string>
+    <string name="col_dd_n">%1$dth</string>
     <string name="metric_abs">True absolute error</string>
     <string name="metric_abs_cap">|f(x) − P(x)|</string>
     <string name="metric_rel">Relative error</string>

@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.numlab.ui.R
 import app.numlab.ui.motion.LocalReduceMotion
 import app.numlab.ui.motion.Motion
 import app.numlab.ui.theme.MonoStyle
@@ -180,7 +182,7 @@ fun Stepper(
             .then(if (invalid) Modifier.border(2.dp, cs.error, RoundedCornerShape(16.dp)) else Modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton({ tick(); onMinus() }) { Icon(Icons.Outlined.Remove, "Decrease $label", tint = cs.onSurfaceVariant) }
+        IconButton({ tick(); onMinus() }) { Icon(Icons.Outlined.Remove, stringResource(R.string.cd_decrease, label), tint = cs.onSurfaceVariant) }
         Column(Modifier.weight(1f).padding(vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, letterSpacing = 0.8.sp)
@@ -197,7 +199,7 @@ fun Stepper(
                 )
             }
         }
-        IconButton({ tick(); onPlus() }) { Icon(Icons.Outlined.Add, "Increase $label", tint = cs.onSurfaceVariant) }
+        IconButton({ tick(); onPlus() }) { Icon(Icons.Outlined.Add, stringResource(R.string.cd_increase, label), tint = cs.onSurfaceVariant) }
     }
 }
 
