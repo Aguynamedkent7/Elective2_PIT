@@ -37,7 +37,12 @@ import kotlin.math.max
  * NavHost route so the circular reveal can show Home underneath (docs/DECISIONS.md).
  */
 @Composable
-fun WorkbenchRoute(vm: WorkbenchViewModel, openHistory: () -> Unit, openSettings: () -> Unit) {
+fun WorkbenchRoute(
+    vm: WorkbenchViewModel,
+    openHistory: () -> Unit,
+    openSettings: () -> Unit,
+    adBanner: @Composable (visible: Boolean) -> Unit = {},
+) {
     val st by vm.state.collectAsStateWithLifecycle()
     val homeSnack = remember { SnackbarHostState() }
     val canvasSnack = remember { SnackbarHostState() }
@@ -77,7 +82,7 @@ fun WorkbenchRoute(vm: WorkbenchViewModel, openHistory: () -> Unit, openSettings
         Box(Modifier.fillMaxSize().then(if (st.graphOpen) Modifier.clearAndSetSemantics {} else Modifier).graphicsLayer {
             if (!reduce) { scaleX = 1f - 0.06f * p; scaleY = 1f - 0.06f * p }
             alpha = 1f - 0.5f * p
-        }) { HomeScreen(st, actions, homeSnack) }
+        }) { HomeScreen(st, actions, homeSnack) { adBanner(!st.graphOpen && p == 0f) } }
         if (st.graphOpen || p > 0f) {
             val density = LocalDensity.current
             val w = with(density) { maxWidth.toPx() }

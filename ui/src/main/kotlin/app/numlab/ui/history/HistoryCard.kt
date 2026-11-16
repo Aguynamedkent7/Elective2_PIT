@@ -1,5 +1,6 @@
 package app.numlab.ui.history
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Notes
@@ -78,29 +80,34 @@ class CardActions(
 
 private enum class View { GRAPH, TABLE, WORKING }
 
-/** Run with the method swapped (the "Try" chips). */
-private fun RunInput.withMethod(m: String): RunInput = when (this) {
-    is RunInput.Root -> RunInput.Root(input.copy(method = RootMethod.valueOf(m)))
-    is RunInput.Interp -> RunInput.Interp(input.copy(method = InterpMethod.valueOf(m)))
+/** The same run with each of the other methods, in enum order (the "Try" chips). */
+private fun RunInput.alternatives(): List<RunInput> = when (this) {
+    is RunInput.Root -> RootMethod.entries.filter { it != input.method }
+        .map { RunInput.Root(input.copy(method = it)) }
+    is RunInput.Interp -> InterpMethod.entries.filter { it != input.method }
+        .map { RunInput.Interp(input.copy(method = it)) }
 }
 
-private fun RunInput.methodName() = when (this) {
-    is RunInput.Root -> input.method.name
-    is RunInput.Interp -> input.method.name
+@StringRes
+private fun RunInput.methodLabel(): Int = when (this) {
+    is RunInput.Root -> rootMethodShort(input.method)
+    is RunInput.Interp -> interpMethodShort(input.method)
 }
 
-private fun methodLabel(m: String) = RootMethod.entries.firstOrNull { it.name == m }?.let(::rootMethodShort)
-    ?: interpMethodShort(InterpMethod.valueOf(m))
-
+/** Card background and ink for the run's method. Exhaustive, so a new method won't compile until it has a colour. */
 @Composable
-private fun tint(m: String): Pair<Color, Color> {
+private fun RunInput.tint(): Pair<Color, Color> {
     val c = NumLabTheme.colors
-    return when (m) {
-        "BISECTION" -> c.bisectionBg to c.bisectionInk
-        "NEWTON" -> c.newtonBg to c.newtonInk
-        "SECANT" -> c.secantBg to c.secantInk
-        "LAGRANGE" -> c.lagrangeBg to c.lagrangeInk
-        else -> c.newtonDdBg to c.newtonDdInk
+    return when (this) {
+        is RunInput.Root -> when (input.method) {
+            RootMethod.BISECTION -> c.bisectionBg to c.bisectionInk
+            RootMethod.NEWTON -> c.newtonBg to c.newtonInk
+            RootMethod.SECANT -> c.secantBg to c.secantInk
+        }
+        is RunInput.Interp -> when (input.method) {
+            InterpMethod.LAGRANGE -> c.lagrangeBg to c.lagrangeInk
+            InterpMethod.NEWTON_DD -> c.newtonDdBg to c.newtonDdInk
+        }
     }
 }
 
@@ -109,18 +116,19 @@ private fun tint(m: String): Pair<Color, Color> {
 @Composable
 fun HistoryCard(card: Card, whenLabel: String, decimals: Int, a: CardActions) {
     val item = card.item
-    var tryM by rememberSaveable(item.id) { mutableStateOf<String?>(null) }
+    var tryIdx by rememberSaveable(item.id) { mutableStateOf<Int?>(null) }
     var view by rememberSaveable(item.id) { mutableStateOf<View?>(null) }
     var sel by rememberSaveable(item.id) { mutableStateOf<Int?>(null) }
-    val run = tryM?.let { item.run.withMethod(it) } ?: item.run
-    val result = if (tryM == null) card.result else remember(run) { solve(run) }
+    val alternatives = remember(item.run) { item.run.alternatives() }
+    val run = tryIdx?.let { alternatives.getOrNull(it) } ?: item.run
+    val result = if (run === item.run) card.result else remember(run) { solve(run) }
     val solved = result.getOrNull()
-    val (bg, ink) = tint(run.methodName())
+    val (bg, ink) = run.tint()
     val reduce = LocalReduceMotion.current
     Surface(Modifier.fillMaxWidth(), RoundedCornerShape(28.dp), bg, ink) {
         Column(Modifier.padding(20.dp).animateContentSize(tween(if (reduce) 0 else 260, easing = Motion.Standard))) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Chip(stringResource(methodLabel(run.methodName())), ink)
+                Chip(stringResource(run.methodLabel()), ink)
                 Text(whenLabel, style = MaterialTheme.typography.bodySmall, color = ink.copy(alpha = 0.6f), modifier = Modifier.weight(1f))
                 val spin by animateFloatAsState(if (item.pinned) 0f else 45f, tween(if (reduce) 0 else 280, easing = Motion.Spring), label = "pin")
                 IconButton(a.pin) {
@@ -176,9 +184,8 @@ fun HistoryCard(card: Card, whenLabel: String, decimals: Int, a: CardActions) {
             FlowRow(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp), itemVerticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.try_label), style = MaterialTheme.typography.bodySmall, color = ink.copy(alpha = 0.6f))
-                val methods = if (item.run is RunInput.Root) RootMethod.entries.map { it.name } else InterpMethod.entries.map { it.name }
-                methods.filter { it != item.run.methodName() }.forEach { m ->
-                    ViewChip(methodLabel(m), Icons.Outlined.Bolt, tryM == m, ink) { tryM = if (tryM == m) null else m }
+                alternatives.forEachIndexed { i, alt ->
+                    ViewChip(alt.methodLabel(), Icons.Outlined.Bolt, tryIdx == i, ink) { tryIdx = if (tryIdx == i) null else i }
                 }
                 }
                 Surface({ a.open(run) }, shape = CircleShape, color = MaterialTheme.colorScheme.onSurface, contentColor = MaterialTheme.colorScheme.surface) {
@@ -199,7 +206,8 @@ private fun Summary(solved: Solved, ink: Color) {
         Column(Modifier.weight(1f)) {
             Text(Fmt.fmt(if (solved is Solved.Root) solved.res.root else (solved as Solved.Interp).res.pxe, 6),
                 style = TextStyle(fontFamily = Bricolage, fontWeight = FontWeight.SemiBold, fontSize = 38.sp, lineHeight = 44.sp,
-                    fontFeatureSettings = TNUM), maxLines = 1)
+                    fontFeatureSettings = TNUM), maxLines = 1, softWrap = false,
+                autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = 38.sp))
             FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp),
                 itemVerticalAlignment = Alignment.CenterVertically) {
                 val small = MaterialTheme.typography.bodySmall

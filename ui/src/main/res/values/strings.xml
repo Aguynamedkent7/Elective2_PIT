@@ -176,7 +176,8 @@
     <string name="settings_defaults">Defaults for new runs</string>
     <string name="settings_about">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_privacy">No data leaves your device. NumLab has no network access, accounts or analytics.</string>
+    <string name="about_privacy">Your calculations and history stay on your device. NumLab shows ads from Google AdMob, which may collect device data such as the advertising ID. NumLab has no accounts or analytics of its own.</string>
+    <string name="ad_privacy_options">Ad privacy choices</string>
     <string name="about_licences">Fonts: Geist, Geist Mono, Bricolage Grotesque (SIL Open Font License 1.1).</string>
 
     <string name="splash_skip">Tap to skip</string>

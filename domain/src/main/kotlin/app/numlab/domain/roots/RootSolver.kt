@@ -100,7 +100,7 @@ fun solveRoot(inp: RootInput, fn: CompiledFn? = null): RootResult {
                         converged = true
                         break
                     }
-                    if (flo * fc < 0) {
+                    if (flo == 0.0 || flo * fc < 0) {
                         hi = x
                     } else {
                         lo = x
