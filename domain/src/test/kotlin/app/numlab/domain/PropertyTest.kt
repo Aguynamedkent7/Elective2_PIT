@@ -8,6 +8,7 @@ import app.numlab.domain.interp.PointRow
 import app.numlab.domain.interp.interpolate
 import app.numlab.domain.model.DomainException
 import app.numlab.domain.parser.ExprParser
+import app.numlab.domain.roots.KeepReason
 import app.numlab.domain.roots.RootFailure
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootMethod
@@ -93,6 +94,20 @@ class PropertyTest {
         }.exceptionOrNull() as RootFailure
         assertEquals("f′(x) is about 0 at x = 0. Newton cannot continue", e.message)
         assertEquals(1, e.rows.size)
+    }
+
+    @Test
+    fun `every bisection keep-half line has a formula and a reason`() {
+        val reasons = mutableSetOf<KeepReason>()
+        listOf("x^3 - x - 2" to ("1" to "2"), "x" to ("0" to "1"), "x - 1.5" to ("1" to "2")).forEach { (fx, ab) ->
+            val res = solveRoot(RootInput(RootMethod.BISECTION, fx, a = ab.first, b = ab.second))
+            res.rows.indices.forEach { i ->
+                val keep = explainStep(res, i).lines.single { it.title == StepTitle.KEEP_HALF }
+                assertTrue(keep.formula.isNotBlank(), "$fx row $i")
+                reasons += keep.reason!!
+            }
+        }
+        assertEquals(KeepReason.entries.toSet(), reasons)
     }
 
     @Test

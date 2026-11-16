@@ -26,6 +26,8 @@
     <string name="cd_eval_slider">Evaluate at x</string>
     <string name="cd_decrease">Decrease %1$s</string>
     <string name="cd_increase">Increase %1$s</string>
+    <string name="cd_point_x">x%1$d</string>
+    <string name="cd_point_y">y%1$d</string>
 
     <string name="module_roots">Roots</string>
     <string name="module_interp">Interpolate</string>
@@ -35,7 +37,6 @@
     <string name="method_lagrange">Lagrange</string>
     <string name="method_newton_dd">Newton DD</string>
     <string name="method_newton_long">Newton-Raphson</string>
-    <string name="method_newton_dd_long">Newton divided difference</string>
 
     <string name="fx_label">f(x)</string>
     <string name="fx_placeholder">e.g. x^3 - x - 2</string>
@@ -134,7 +135,6 @@
     <string name="extrapolating">Extrapolating: x is outside the data range</string>
     <string name="no_metrics">Choose a reference in the inputs to see error metrics.</string>
     <string name="no_metrics_history">This run has no reference value, so there are no error metrics.</string>
-    <string name="fix_input">Fix the input to see results</string>
     <string name="fix_input_sheet">Fix the input to see a result.</string>
 
     <string name="graph">Graph</string>
@@ -147,7 +147,6 @@
     <string name="graph_locked_fix">Fix the input to unlock the graph</string>
     <string name="graph_a11y_root">Graph of f(x). Root at x ≈ %1$s.</string>
     <string name="graph_a11y_interp">Graph of the interpolating polynomial. P(%1$s) = %2$s.</string>
-    <string name="points_title">%1$d points</string>
 
     <string name="menu_save">Save to history</string>
     <string name="menu_copy_result">Copy result</string>
@@ -191,7 +190,6 @@
     <string name="no_error_reference">no error reference</string>
     <string name="try_label">Try</string>
     <string name="open">Open</string>
-    <string name="preview_of">Preview with %1$s</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_theme">Theme</string>
