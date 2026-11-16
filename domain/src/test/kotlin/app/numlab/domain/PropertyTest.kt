@@ -11,6 +11,9 @@ import app.numlab.domain.parser.ExprParser
 import app.numlab.domain.roots.RootFailure
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootMethod
+import app.numlab.domain.roots.StepTitle
+import app.numlab.domain.roots.StopNote
+import app.numlab.domain.roots.WorkLine
 import app.numlab.domain.roots.explainStep
 import app.numlab.domain.roots.solveRoot
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -96,10 +99,10 @@ class PropertyTest {
     fun `explain step and exports for the default bisection`() {
         val res = solveRoot(RootInput(RootMethod.BISECTION, "x^3 - x - 2", a = "1", b = "2"))
         val first = explainStep(res, 0)
-        assertEquals("Midpoint" to "c = (a + b) / 2 = (1.000000 + 2.000000) / 2 = 1.500000", first.lines[0])
+        assertEquals(WorkLine(StepTitle.MIDPOINT, "c = (a + b) / 2 = (1.000000 + 2.000000) / 2 = 1.500000"), first.lines[0])
         assertEquals(null, first.note)
         val last = explainStep(res, res.rows.lastIndex)
-        assertEquals("Stopped here because the change 7.63e-6 is below the tolerance 0.00001.", last.note)
+        assertEquals(StopNote.Converged("7.63e-6", "0.00001"), last.note)
         assertEquals("x^{*} \\approx 1.521385", res.toLatex())
         assertEquals("iter,x,f(x),abs_error,rel_error_pct", res.toCsv().lines()[0])
         assertEquals("1,1.5,-0.125,,", res.toCsv().lines()[1])
