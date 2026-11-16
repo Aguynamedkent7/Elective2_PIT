@@ -139,13 +139,17 @@ fun basisTable(res: InterpResult, dp: Int): Pair<List<Col>, List<List<Cell>>> =
             listOf(Cell(b.i.toString()), Cell(fmt(b.x, 4)), Cell(fmt(b.y, 4)), Cell(fmt(b.l, dp)), Cell(fmt(b.term, dp)))
         }
 
-private fun ddCol(j: Int) = when (j) {
-    0 -> Col(R.string.col_dd_0, 100.dp)
-    1 -> Col(R.string.col_dd_1, 100.dp)
-    2 -> Col(R.string.col_dd_2, 100.dp)
-    3 -> Col(R.string.col_dd_3, 100.dp)
-    else -> Col(R.string.col_dd_n, 100.dp, headerArg = j)
+/** Ordinal pattern for n ≥ 1: 1st, 2nd, 3rd, 4th … 11th–13th, 21st, 22nd … */
+@StringRes
+fun ordinalRes(n: Int): Int = when {
+    n % 100 in 11..13 -> R.string.ordinal_th
+    n % 10 == 1 -> R.string.ordinal_st
+    n % 10 == 2 -> R.string.ordinal_nd
+    n % 10 == 3 -> R.string.ordinal_rd
+    else -> R.string.ordinal_th
 }
+
+private fun ddCol(j: Int) = if (j == 0) Col(R.string.col_dd_0, 100.dp) else Col(ordinalRes(j), 100.dp, headerArg = j)
 
 fun ddTable(res: InterpResult): Pair<List<Col>, List<List<Cell>>> =
     (listOf(Col(R.string.col_xi, 72.dp, start = true)) + res.dd.indices.map(::ddCol)) to

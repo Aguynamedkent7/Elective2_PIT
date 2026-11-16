@@ -78,7 +78,7 @@ fun FxInput(value: String, onChange: (String) -> Unit, modifier: Modifier = Modi
                 .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("f(x) =", style = MonoStyle.copy(fontSize = 13.sp), color = cs.onSurfaceVariant)
+            Text(stringResource(R.string.fx_prefix), style = MonoStyle.copy(fontSize = 13.sp), color = cs.onSurfaceVariant)
             Box(Modifier.weight(1f).padding(horizontal = 8.dp)) {
                 if (value.isEmpty()) {
                     Text(stringResource(R.string.fx_placeholder), style = MonoStyle.copy(fontSize = 16.sp),
