@@ -89,8 +89,9 @@ fun rememberExporter(): Exporter {
     val ctx = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    return remember(ctx) {
-        Exporter(ctx) { text -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(ctx.getString(R.string.app_name), text))) } }
+    val clipLabel = stringResource(R.string.app_name)
+    return remember(ctx, clipLabel) {
+        Exporter(ctx) { text -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(clipLabel, text))) } }
     }
 }
 
