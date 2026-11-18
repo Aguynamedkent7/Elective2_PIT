@@ -9,6 +9,8 @@ import app.numlab.domain.interp.Truth
 import app.numlab.domain.model.HistoryItem
 import app.numlab.domain.model.RunCodec
 import app.numlab.domain.model.RunInput
+import app.numlab.domain.model.parseNumber
+import app.numlab.domain.model.parseNumberOrNull
 import app.numlab.domain.repo.Draft
 import app.numlab.domain.repo.HistoryRepository
 import app.numlab.domain.repo.SaveResult
@@ -35,6 +37,17 @@ class ExtrasTest {
     private val root = RootInput(RootMethod.SECANT, "x^3 - x - 2", "1", "2", "1.5", "1", "2")
     private val sin = InterpInput(InterpMethod.NEWTON_DD,
         listOf(PointRow("0", "0"), PointRow("1", "0.8415"), PointRow("2", "0.9093"), PointRow("3", "0.1411")), "1.5", Truth.VALUE, yTrue = "0.9975")
+
+    @Test
+    fun numericFieldsAcceptFiniteConstantExpressions() {
+        assertEquals(Math.PI / 2, parseNumber("pi/2", "a"), 1e-12)
+        assertEquals(1.0 / 3.0, parseNumber("1/3", "x₀"), 1e-12)
+        assertEquals(kotlin.math.sqrt(2.0), parseNumber("sqrt(2)", "true value"), 1e-12)
+        assertEquals(Math.E, parseNumber("e", "xₑ"), 1e-12)
+        assertEquals(-1.0, parseNumber("−1", "a"), 0.0)
+        assertEquals(null, parseNumberOrNull("x - x + 3"))
+        assertEquals(null, parseNumberOrNull("1/0"))
+    }
 
     @Test
     fun codecRoundTripsBothKinds() {

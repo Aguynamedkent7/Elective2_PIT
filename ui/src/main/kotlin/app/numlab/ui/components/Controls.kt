@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.onSizeChanged
@@ -49,10 +51,12 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -62,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.numlab.ui.R
 import app.numlab.ui.motion.LocalReduceMotion
 import app.numlab.ui.motion.Motion
 import app.numlab.ui.theme.MonoStyle
@@ -175,6 +180,7 @@ fun Stepper(
 ) {
     val cs = MaterialTheme.colorScheme
     val tick = rememberTick()
+    var moreKeyboard by remember(label) { mutableStateOf(false) }
     Row(
         modifier.heightIn(min = 56.dp).background(cs.surfaceVariant, RoundedCornerShape(16.dp))
             .then(if (invalid) Modifier.border(2.dp, cs.error, RoundedCornerShape(16.dp)) else Modifier),
@@ -182,8 +188,20 @@ fun Stepper(
     ) {
         IconButton({ tick(); onMinus() }) { Icon(Icons.Outlined.Remove, "Decrease $label", tint = cs.onSurfaceVariant) }
         Column(Modifier.weight(1f).padding(vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = cs.onSurfaceVariant,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, letterSpacing = 0.8.sp)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(label.uppercase(), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall,
+                    color = cs.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis, letterSpacing = 0.8.sp)
+                if (onText != null) {
+                    Text(
+                        stringResource(if (moreKeyboard) R.string.keyboard_numeric else R.string.keyboard_more),
+                        Modifier.clickable { moreKeyboard = !moreKeyboard }
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                            .semantics { role = Role.Button },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cs.primary,
+                    )
+                }
+            }
             val style = MonoStyle.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, color = cs.onSurface,
                 textAlign = TextAlign.Center)
             if (onText == null) {
@@ -192,8 +210,10 @@ fun Stepper(
                 BasicTextField(
                     display, onText, Modifier.fillMaxWidth().semantics { contentDescription = label }, textStyle = style,
                     singleLine = true, cursorBrush = SolidColor(cs.primary),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Next,
-                        autoCorrectEnabled = false),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (moreKeyboard) KeyboardType.Ascii else KeyboardType.Decimal,
+                        imeAction = ImeAction.Next, autoCorrectEnabled = false,
+                    ),
                 )
             }
         }

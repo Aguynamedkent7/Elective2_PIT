@@ -51,6 +51,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.numlab.domain.model.parseNumberOrNull
 import app.numlab.ui.R
 import app.numlab.ui.components.ErrorBox
 import app.numlab.ui.components.IterationsPane
@@ -118,7 +119,7 @@ fun HomeScreen(st: WorkbenchState, a: HomeActions, snackbar: SnackbarHostState, 
                     st.visibleError?.let { err ->
                         ErrorBox(err.message)
                         if (err.rows.isNotEmpty()) {
-                            IterationsPane(err.rows, st.root.tol.toDoubleOrNull() ?: 0.0, st.decimals, null, null, maxHeight = 260.dp)
+                            IterationsPane(err.rows, parseNumberOrNull(st.root.tol) ?: 0.0, st.decimals, null, null, maxHeight = 260.dp)
                         }
                     }
                     // Clears the pinned Graph/Save bar, which grows with font scale (PLAN §6.7), and the ad under it.

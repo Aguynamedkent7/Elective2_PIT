@@ -9,6 +9,7 @@ import app.numlab.domain.interp.PointRow
 import app.numlab.domain.interp.Truth
 import app.numlab.domain.interp.genNodes
 import app.numlab.domain.model.RunInput
+import app.numlab.domain.model.parseNumberOrNull
 import app.numlab.domain.parser.ExprParser
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootMethod
@@ -80,7 +81,7 @@ data class WorkbenchState(
 }
 
 fun pointCount(rows: List<PointRow>) = rows.count {
-    it.x.trim().toDoubleOrNull()?.isFinite() == true && it.y.trim().toDoubleOrNull()?.isFinite() == true
+    parseNumberOrNull(it.x) != null && parseNumberOrNull(it.y) != null
 }
 
 val START_ROOT = RootInput(RootMethod.BISECTION, "", "1", "2", "1.5", "1", "2")
@@ -112,7 +113,7 @@ val INTERP_EXAMPLES: List<Pair<Int, InterpInput>> = listOf(
 
 /** Tolerance exponent e for 10⁻ᵉ, clamped to 1..12 (prototype `tolExp`). */
 fun tolExp(tol: String): Int {
-    val v = tol.trim().toDoubleOrNull()
+    val v = parseNumberOrNull(tol)
     return if (v != null && v.isFinite() && v > 0) Math.round(-kotlin.math.log10(v)).toInt().coerceIn(1, 12) else 5
 }
 
