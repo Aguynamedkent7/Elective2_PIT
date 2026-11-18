@@ -32,7 +32,9 @@ import app.numlab.ui.components.Seg
 import app.numlab.ui.components.Stepper
 import app.numlab.ui.theme.Bricolage
 import app.numlab.ui.workbench.StepperGrid
-import app.numlab.ui.workbench.superscript
+import app.numlab.ui.workbench.decrementMaxIterations
+import app.numlab.ui.workbench.isValidTolerance
+import app.numlab.ui.workbench.toleranceDisplay
 import app.numlab.ui.workbench.tolExp
 
 /** Settings sheet (PLAN §6.6). */
@@ -70,14 +72,17 @@ fun SettingsSheet(
                 StepperGrid {
                     val e = tolExp(s.defaultTolerance)
                     item {
-                        Stepper(stringResource(R.string.field_tolerance), "10${superscript(-e)}",
+                        Stepper(stringResource(R.string.field_tolerance), toleranceDisplay(s.defaultTolerance),
                             { update { it.copy(defaultTolerance = "1e-${minOf(12, e + 1)}") } },
-                            { update { it.copy(defaultTolerance = "1e-${maxOf(1, e - 1)}") } })
+                            { update { it.copy(defaultTolerance = "1e-${maxOf(1, e - 1)}") } },
+                            onText = { value -> update { it.copy(defaultTolerance = value) } },
+                            invalid = !isValidTolerance(s.defaultTolerance),
+                        )
                     }
                     item {
                         val n = s.defaultMaxIter.toIntOrNull() ?: 100
                         Stepper(stringResource(R.string.field_max_iter), n.toString(),
-                            { update { it.copy(defaultMaxIter = (n - 10).coerceAtLeast(5).toString()) } },
+                            { update { it.copy(defaultMaxIter = decrementMaxIterations(n).toString()) } },
                             { update { it.copy(defaultMaxIter = (n + 10).coerceAtMost(MAX_ITER_CAP).toString()) } })
                     }
                     wide {

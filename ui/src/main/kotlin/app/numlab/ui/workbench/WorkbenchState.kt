@@ -15,6 +15,8 @@ import app.numlab.domain.roots.RootMethod
 import app.numlab.domain.roots.RootResult
 import app.numlab.domain.roots.RootRow
 import app.numlab.ui.R
+import kotlin.math.log10
+import kotlin.math.pow
 
 enum class Module { ROOTS, INTERP }
 
@@ -113,8 +115,25 @@ val INTERP_EXAMPLES: List<Pair<Int, InterpInput>> = listOf(
 /** Tolerance exponent e for 10⁻ᵉ, clamped to 1..12 (prototype `tolExp`). */
 fun tolExp(tol: String): Int {
     val v = tol.trim().toDoubleOrNull()
-    return if (v != null && v.isFinite() && v > 0) Math.round(-kotlin.math.log10(v)).toInt().coerceIn(1, 12) else 5
+    return if (v != null && v.isFinite() && v > 0) Math.round(-log10(v)).toInt().coerceIn(1, 12) else 5
 }
+
+/** Keep the compact power-of-ten label only when it represents the actual tolerance. */
+fun toleranceDisplay(tol: String): String {
+    val value = tol.trim().toDoubleOrNull()
+    if (value == null || !value.isFinite() || value <= 0) return tol
+    val exponent = Math.round(-log10(value)).toInt()
+    return if (exponent in 1..12 && value == 10.0.pow(-exponent)) {
+        "10${superscript(-exponent)}"
+    } else {
+        tol
+    }
+}
+
+fun isValidTolerance(tol: String): Boolean =
+    tol.trim().toDoubleOrNull()?.let { it.isFinite() && it > 0 } == true
+
+fun decrementMaxIterations(value: Int): Int = (value - 10).coerceAtLeast(1)
 
 private const val SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 fun superscript(n: Int): String = n.toString().map { if (it == '-') '⁻' else SUP[it - '0'] }.joinToString("")

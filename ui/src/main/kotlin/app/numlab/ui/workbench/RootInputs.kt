@@ -75,15 +75,20 @@ fun RootInputs(
                     item { NumStepper(stringResource(R.string.field_x1), inp.s1) { v -> onChange { it.copy(s1 = v) } } }
                 }
             }
-            val e = tolExp(inp.tol)
             item {
-                Stepper(stringResource(R.string.field_tolerance), "10${superscript(-e)}",
-                    { onChange { it.copy(tol = "1e-${minOf(12, e + 1)}") } }, { onChange { it.copy(tol = "1e-${maxOf(1, e - 1)}") } })
+                val e = tolExp(inp.tol)
+                Stepper(
+                    stringResource(R.string.field_tolerance), toleranceDisplay(inp.tol),
+                    { onChange { it.copy(tol = "1e-${minOf(12, e + 1)}") } },
+                    { onChange { it.copy(tol = "1e-${maxOf(1, e - 1)}") } },
+                    onText = { v -> onChange { it.copy(tol = v) } },
+                    invalid = !isValidTolerance(inp.tol),
+                )
             }
             item {
                 val n = inp.maxIter.toIntOrNull()
                 Stepper(stringResource(R.string.field_max_iter), inp.maxIter,
-                    { onChange { it.copy(maxIter = ((n ?: 110) - 10).coerceAtLeast(5).toString()) } },
+                    { onChange { it.copy(maxIter = decrementMaxIterations(n ?: 110).toString()) } },
                     { onChange { it.copy(maxIter = ((n ?: 90) + 10).coerceAtMost(MAX_ITER_CAP).toString()) } },
                     onText = { v -> onChange { it.copy(maxIter = v) } })
             }
