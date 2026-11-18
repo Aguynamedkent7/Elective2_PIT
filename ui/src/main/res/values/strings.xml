@@ -24,6 +24,8 @@
     <string name="cd_more">More actions</string>
     <string name="cd_iteration_slider">Iteration</string>
     <string name="cd_eval_slider">Evaluate at x</string>
+    <string name="keyboard_more">More</string>
+    <string name="keyboard_numeric">123</string>
 
     <string name="module_roots">Roots</string>
     <string name="module_interp">Interpolate</string>

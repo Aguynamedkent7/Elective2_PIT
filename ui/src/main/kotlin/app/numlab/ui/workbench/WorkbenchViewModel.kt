@@ -8,6 +8,7 @@ import app.numlab.domain.format.Fmt
 import app.numlab.domain.interp.InterpInput
 import app.numlab.domain.model.RunCodec
 import app.numlab.domain.model.RunInput
+import app.numlab.domain.model.parseNumberOrNull
 import app.numlab.domain.parser.ExprParser
 import app.numlab.domain.repo.Draft
 import app.numlab.domain.repo.HistoryRepository
@@ -138,7 +139,7 @@ class WorkbenchViewModel @Inject constructor(
 
     /** Drag a data point on the canvas: the row whose x equals [x] gets the new y. */
     fun dragPoint(x: Double, y: Double) = setInterp { inp ->
-        val ri = inp.rows.indexOfFirst { it.x.trim().toDoubleOrNull() == x }
+        val ri = inp.rows.indexOfFirst { parseNumberOrNull(it.x) == x }
         if (ri < 0) inp
         else inp.copy(rows = inp.rows.mapIndexed { j, r -> if (j == ri) r.copy(y = Fmt.jsNum(Fmt.toFixed(y, 4).toDouble())) else r })
     }

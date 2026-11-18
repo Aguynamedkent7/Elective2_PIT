@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.numlab.domain.format.Fmt
+import app.numlab.domain.model.parseNumberOrNull
 import app.numlab.domain.roots.MAX_ITER_CAP
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootMethod
@@ -57,7 +58,7 @@ fun RootInputs(
                 SectionLabel(stringResource(R.string.roots_detected))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     brackets.forEach { (a, b) ->
-                        val active = inp.a.toDoubleOrNull() == a && inp.b.toDoubleOrNull() == b
+                        val active = parseNumberOrNull(inp.a) == a && parseNumberOrNull(inp.b) == b
                         Pill("[${Fmt.jsNum(a)}, ${Fmt.jsNum(b)}]", { onBracket(a, b) }, active = active, icon = Icons.Outlined.Bolt)
                     }
                 }
@@ -98,12 +99,12 @@ fun RootInputs(
 /** Editable number with −/+ 0.1 (prototype `NumField`). */
 @Composable
 fun NumStepper(label: String, value: String, step: Double = 0.1, onChange: (String) -> Unit) {
-    val v = value.trim().toDoubleOrNull()
+    val v = parseNumberOrNull(value)
     fun bump(d: Int) {
-        if (v != null && v.isFinite()) onChange(Fmt.jsNum(Fmt.toFixed(v + d * step, 10).toDouble()))
+        if (v != null) onChange(Fmt.jsNum(Fmt.toFixed(v + d * step, 10).toDouble()))
     }
     Stepper(label, value, { bump(-1) }, { bump(1) }, onText = onChange,
-        invalid = value.isNotBlank() && (v == null || !v.isFinite()))
+        invalid = value.isNotBlank() && v == null)
 }
 
 /** Two-column grid that reflows to one column at large font scales (PLAN §6.7). */

@@ -194,9 +194,20 @@ object ExprParser : ExpressionEngine {
     override fun compile(src: String): Result<CompiledFn> = domainCatching { compileOrThrow(src) }
 
     /** Like [compile] but throws [DomainException]. */
-    fun compileOrThrow(src: String): CompiledFn {
+    fun compileOrThrow(src: String): CompiledFn = compileTokens(src, tokenize(src))
+
+    /** Evaluates a constant expression, rejecting even expressions that cancel out their x terms. */
+    fun evaluateConstantOrThrow(src: String): Double {
+        val tokens = tokenize(src)
+        if (tokens.any { it is Tok.Id && it.v == "x" }) {
+            throw DomainException("A numeric field cannot contain x")
+        }
+        return compileTokens(src, tokens).eval(0.0)
+    }
+
+    private fun compileTokens(src: String, tokens: List<Tok>): CompiledFn {
         if (src.isBlank()) throw DomainException("Enter a function of x")
-        val fn = Parser(tokenize(src)).parse()
+        val fn = Parser(tokens).parse()
         return CompiledFn { x ->
             val v = fn(x)
             if (!v.isFinite()) throw DomainException("f(x) is undefined at x = ${fmt(x, 4)}")

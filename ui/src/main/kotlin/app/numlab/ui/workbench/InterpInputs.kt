@@ -1,6 +1,7 @@
 package app.numlab.ui.workbench
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -138,10 +141,18 @@ private fun PasteBox(text: String, onText: (String) -> Unit) {
 private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
     val cs = MaterialTheme.colorScheme
     val focus = LocalFocusManager.current
+    var moreKeyboard by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionLabel("x", Modifier.weight(1f))
             SectionLabel("y", Modifier.weight(1f))
+            Text(
+                stringResource(if (moreKeyboard) R.string.keyboard_numeric else R.string.keyboard_more),
+                Modifier.clickable { moreKeyboard = !moreKeyboard }
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                    .semantics { role = Role.Button },
+                style = MaterialTheme.typography.labelSmall, color = cs.primary,
+            )
             Spacer(Modifier.width(48.dp))
         }
         rows.forEachIndexed { i, r ->
@@ -153,7 +164,10 @@ private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
                             .padding(horizontal = 12.dp, vertical = 13.dp).semantics { contentDescription = label },
                         textStyle = MonoStyle.copy(fontSize = 14.sp, color = cs.onSurface), singleLine = true,
                         cursorBrush = SolidColor(cs.primary),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Next, autoCorrectEnabled = false),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = if (moreKeyboard) KeyboardType.Ascii else KeyboardType.Decimal,
+                            imeAction = ImeAction.Next, autoCorrectEnabled = false,
+                        ),
                         keyboardActions = KeyboardActions(onNext = { focus.moveFocus(FocusDirection.Next) }),
                     )
                 }
