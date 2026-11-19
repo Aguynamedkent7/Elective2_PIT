@@ -24,7 +24,7 @@ fun MiniGraph(solved: Solved, modifier: Modifier = Modifier) {
         is Solved.Root -> {
             val r = solved.res
             val pts = r.rows.map { PlotPoint(PointKind.ITER, it.x, it.fx, alpha = 0.5f) } +
-                PlotPoint(PointKind.ROOT, r.root, r.fRoot, "x* ≈ ${fmt(r.root, 5)}")
+                PlotPoint(PointKind.ROOT, r.root, r.fRoot, stringResource(R.string.graph_point_root, fmt(r.root, 5)))
             val domain = remember(r) { domainFor(listOf(r.root) + r.rows.map { it.x } + r.used) }
             Plot(listOf(Curve({ r.f.eval(it) }, curve, 2.8f)), pts, emptyList(), domain,
                 stringResource(R.string.graph_a11y_root, fmt(r.root, 6)), modifier, interactive = false)
@@ -32,7 +32,7 @@ fun MiniGraph(solved: Solved, modifier: Modifier = Modifier) {
         is Solved.Interp -> {
             val r = solved.res
             val pts = r.points.map { PlotPoint(PointKind.DATA, it.x, it.y) } +
-                PlotPoint(PointKind.TARGET, r.xe, r.pxe, "P(${fmt(r.xe, 3)})") +
+                PlotPoint(PointKind.TARGET, r.xe, r.pxe, stringResource(R.string.p_label_short, fmt(r.xe, 3))) +
                 listOfNotNull(r.metrics?.let { PlotPoint(PointKind.TRUE, r.xe, it.yTrue) })
             val curves = listOf(Curve(r.p, curve, 2.8f, fit = r.fTrue == null, label = "P(x)")) +
                 listOfNotNull(r.fTrue?.let { f -> Curve({ f.eval(it) }, ink2, 2f, dashed = true, probe = false) })

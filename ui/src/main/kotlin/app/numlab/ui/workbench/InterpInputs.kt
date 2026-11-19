@@ -146,7 +146,7 @@ private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
         }
         rows.forEachIndexed { i, r ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(r.x to "x$i", r.y to "y$i").forEachIndexed { k, (v, label) ->
+                listOf(r.x to stringResource(R.string.cd_point_x, i), r.y to stringResource(R.string.cd_point_y, i)).forEachIndexed { k, (v, label) ->
                     BasicTextField(
                         v, { nv -> onRows(rows.mapIndexed { j, row -> if (j != i) row else if (k == 0) row.copy(x = nv) else row.copy(y = nv) }) },
                         Modifier.weight(1f).heightIn(min = 48.dp).background(cs.surfaceVariant, RoundedCornerShape(12.dp))

@@ -31,8 +31,11 @@ import app.numlab.domain.format.Fmt
 import app.numlab.domain.format.Fmt.fmtE
 import app.numlab.domain.interp.InterpMethod
 import app.numlab.domain.interp.InterpResult
+import app.numlab.domain.roots.KeepReason
 import app.numlab.domain.roots.RootResult
 import app.numlab.domain.roots.RootRow
+import app.numlab.domain.roots.StepTitle
+import app.numlab.domain.roots.StopNote
 import app.numlab.domain.roots.explainStep
 import app.numlab.ui.R
 import app.numlab.ui.theme.MonoStyle
@@ -68,8 +71,15 @@ fun WorkingPane(res: RootResult, index: Int, onIndex: (Int) -> Unit) {
             RoundBtn(Icons.AutoMirrored.Outlined.KeyboardArrowRight, stringResource(R.string.cd_next_iter),
                 { onIndex(index + 1) }, enabled = index < res.rows.lastIndex, container = cs.surfaceVariant)
         }
-        w.lines.forEach { (title, body) -> Block(title, body) }
-        w.note?.let { note ->
+        w.lines.forEach { line ->
+            val body = line.reason?.let { stringResource(keepReasonText(it), line.formula) } ?: line.formula
+            Block(stringResource(stepTitleText(line.title)), body)
+        }
+        w.note?.let { stop ->
+            val note = when (stop) {
+                is StopNote.Converged -> stringResource(R.string.working_stop_converged, stop.change, stop.tol)
+                StopNote.IterationLimit -> stringResource(R.string.working_stop_limit)
+            }
             val c = NumLabTheme.colors
             Row(Modifier.fillMaxWidth().background(c.goodBg, RoundedCornerShape(16.dp)).padding(14.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -78,6 +88,25 @@ fun WorkingPane(res: RootResult, index: Int, onIndex: (Int) -> Unit) {
             }
         }
     }
+}
+
+private fun stepTitleText(t: StepTitle) = when (t) {
+    StepTitle.MIDPOINT -> R.string.working_midpoint
+    StepTitle.EVALUATE -> R.string.working_evaluate
+    StepTitle.KEEP_HALF -> R.string.working_keep_half
+    StepTitle.STARTING_GUESS -> R.string.working_starting_guess
+    StepTitle.SLOPE -> R.string.working_slope
+    StepTitle.NEWTON_STEP -> R.string.working_newton_step
+    StepTitle.SECANT_STEP -> R.string.working_secant_step
+    StepTitle.WITH_NUMBERS -> R.string.working_with_numbers
+    StepTitle.CHANGE -> R.string.working_change
+}
+
+private fun keepReasonText(r: KeepReason) = when (r) {
+    KeepReason.EXACT_ROOT -> R.string.working_reason_exact_root
+    KeepReason.ROOT_AT_A -> R.string.working_reason_root_at_a
+    KeepReason.KEEP_LEFT -> R.string.working_reason_keep_left
+    KeepReason.KEEP_RIGHT -> R.string.working_reason_keep_right
 }
 
 /** Expanded polynomial and error metrics with the theoretical bound (PLAN §4.4). */

@@ -24,6 +24,10 @@
     <string name="cd_more">More actions</string>
     <string name="cd_iteration_slider">Iteration</string>
     <string name="cd_eval_slider">Evaluate at x</string>
+    <string name="cd_decrease">Decrease %1$s</string>
+    <string name="cd_increase">Increase %1$s</string>
+    <string name="cd_point_x">x%1$d</string>
+    <string name="cd_point_y">y%1$d</string>
 
     <string name="module_roots">Roots</string>
     <string name="module_interp">Interpolate</string>
@@ -33,9 +37,9 @@
     <string name="method_lagrange">Lagrange</string>
     <string name="method_newton_dd">Newton DD</string>
     <string name="method_newton_long">Newton-Raphson</string>
-    <string name="method_newton_dd_long">Newton divided difference</string>
 
     <string name="fx_label">f(x)</string>
+    <string name="fx_prefix">f(x) =</string>
     <string name="fx_placeholder">e.g. x^3 - x - 2</string>
     <string name="examples">Examples</string>
     <string name="roots_detected">Roots detected. Tap to start there</string>
@@ -89,6 +93,36 @@
     <string name="iteration_n">Iteration %1$d</string>
     <string name="p_expanded">P(x) expanded</string>
     <string name="newton_form">Newton form</string>
+    <string name="working_midpoint">Midpoint</string>
+    <string name="working_evaluate">Evaluate</string>
+    <string name="working_keep_half">Keep the half with the sign change</string>
+    <string name="working_starting_guess">Starting guess</string>
+    <string name="working_slope">Slope by central difference</string>
+    <string name="working_newton_step">Newton step</string>
+    <string name="working_secant_step">Secant step</string>
+    <string name="working_with_numbers">With numbers</string>
+    <string name="working_change">Change</string>
+    <string name="working_reason_exact_root">%1$s, so c is an exact root</string>
+    <string name="working_reason_root_at_a">%1$s, so a is the root and b ← c</string>
+    <string name="working_reason_keep_left">%1$s, so b ← c</string>
+    <string name="working_reason_keep_right">%1$s, so a ← c</string>
+    <string name="working_stop_converged">Stopped here because the change %1$s is below the tolerance %2$s.</string>
+    <string name="working_stop_limit">Stopped at the iteration limit before the change dropped below the tolerance.</string>
+    <string name="col_iter">Iter</string>
+    <string name="col_xn">xₙ</string>
+    <string name="col_fxn">f(xₙ)</string>
+    <string name="col_abs_change">|xₙ − xₙ₋₁|</string>
+    <string name="col_rel_err">Rel. err %</string>
+    <string name="col_i">i</string>
+    <string name="col_xi">xᵢ</string>
+    <string name="col_yi">yᵢ</string>
+    <string name="col_basis">Lᵢ(x)</string>
+    <string name="col_term">yᵢ·Lᵢ</string>
+    <string name="col_dd_0">f[xᵢ]</string>
+    <string name="ordinal_st">%1$dst</string>
+    <string name="ordinal_nd">%1$dnd</string>
+    <string name="ordinal_rd">%1$drd</string>
+    <string name="ordinal_th">%1$dth</string>
     <string name="metric_abs">True absolute error</string>
     <string name="metric_abs_cap">|f(x) − P(x)|</string>
     <string name="metric_rel">Relative error</string>
@@ -102,7 +136,6 @@
     <string name="extrapolating">Extrapolating: x is outside the data range</string>
     <string name="no_metrics">Choose a reference in the inputs to see error metrics.</string>
     <string name="no_metrics_history">This run has no reference value, so there are no error metrics.</string>
-    <string name="fix_input">Fix the input to see results</string>
     <string name="fix_input_sheet">Fix the input to see a result.</string>
 
     <string name="graph">Graph</string>
@@ -113,9 +146,10 @@
     <string name="graph_locked_interp">Add two points or tap an example to unlock the graph</string>
     <string name="graph_locked_need_x">Enter x to evaluate to unlock the graph</string>
     <string name="graph_locked_fix">Fix the input to unlock the graph</string>
+    <string name="graph_point_root">x* ≈ %1$s</string>
+    <string name="graph_point_iter">n = %1$d</string>
     <string name="graph_a11y_root">Graph of f(x). Root at x ≈ %1$s.</string>
     <string name="graph_a11y_interp">Graph of the interpolating polynomial. P(%1$s) = %2$s.</string>
-    <string name="points_title">%1$d points</string>
 
     <string name="menu_save">Save to history</string>
     <string name="menu_copy_result">Copy result</string>
@@ -159,7 +193,6 @@
     <string name="no_error_reference">no error reference</string>
     <string name="try_label">Try</string>
     <string name="open">Open</string>
-    <string name="preview_of">Preview with %1$s</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_theme">Theme</string>

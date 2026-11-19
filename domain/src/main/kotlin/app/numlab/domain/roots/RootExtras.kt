@@ -67,51 +67,66 @@ fun findBrackets(
     return out
 }
 
-/** Per-iteration explanation: (title, formula) lines plus a stop note on the last row. */
-data class Working(val lines: List<Pair<String, String>>, val note: String?)
+/** Heading of one line in the Working pane; `:ui` maps each to a string resource. */
+enum class StepTitle { MIDPOINT, EVALUATE, KEEP_HALF, STARTING_GUESS, SLOPE, NEWTON_STEP, SECANT_STEP, WITH_NUMBERS, CHANGE }
 
-/** Port of `explainStep` in math.js. */
+/** Why bisection kept a half; `:ui` appends the matching sentence to the formula. */
+enum class KeepReason { EXACT_ROOT, ROOT_AT_A, KEEP_LEFT, KEEP_RIGHT }
+
+data class WorkLine(val title: StepTitle, val formula: String, val reason: KeepReason? = null)
+
+/** Note under the last row. Numbers are already formatted. */
+sealed interface StopNote {
+    data class Converged(val change: String, val tol: String) : StopNote
+    data object IterationLimit : StopNote
+}
+
+/** Per-iteration explanation: titled formula lines plus a stop note on the last row. */
+data class Working(val lines: List<WorkLine>, val note: StopNote?)
+
+/** Port of `explainStep` in math.js; the prose lives in `:ui` strings. */
 fun explainStep(res: RootResult, idx: Int): Working {
     val r = res.rows[idx]
     val d = 6
     val f = res.f
-    val lines = mutableListOf<Pair<String, String>>()
+    val lines = mutableListOf<WorkLine>()
     when {
         res.method == RootMethod.BISECTION -> {
             val prod = f.eval(r.lo!!) * r.fx
-            lines += "Midpoint" to "c = (a + b) / 2 = (${fmt(r.lo, d)} + ${fmt(r.hi, d)}) / 2 = ${fmt(r.x, d)}"
-            lines += "Evaluate" to "f(c) = ${fmt(r.fx, d)}"
-            lines += "Keep the half with the sign change" to
-                if (r.fx == 0.0) {
-                    "f(c) = 0, so c is an exact root"
-                } else if (prod == 0.0) {
-                    "f(a) = 0, so a is the root and b ← c"
-                } else {
-                    "f(a)·f(c) = ${fmtE(prod)} ${if (prod < 0) "< 0, so b ← c" else "> 0, so a ← c"}"
-                }
+            lines += WorkLine(StepTitle.MIDPOINT, "c = (a + b) / 2 = (${fmt(r.lo, d)} + ${fmt(r.hi, d)}) / 2 = ${fmt(r.x, d)}")
+            lines += WorkLine(StepTitle.EVALUATE, "f(c) = ${fmt(r.fx, d)}")
+            lines += if (r.fx == 0.0) {
+                WorkLine(StepTitle.KEEP_HALF, "f(c) = 0", KeepReason.EXACT_ROOT)
+            } else if (prod == 0.0) {
+                WorkLine(StepTitle.KEEP_HALF, "f(a) = 0", KeepReason.ROOT_AT_A)
+            } else if (prod < 0) {
+                WorkLine(StepTitle.KEEP_HALF, "f(a)·f(c) = ${fmtE(prod)} < 0", KeepReason.KEEP_LEFT)
+            } else {
+                WorkLine(StepTitle.KEEP_HALF, "f(a)·f(c) = ${fmtE(prod)} > 0", KeepReason.KEEP_RIGHT)
+            }
         }
-        res.method == RootMethod.NEWTON && idx == 0 -> lines += "Starting guess" to "x₀ = ${fmt(r.x, d)}"
+        res.method == RootMethod.NEWTON && idx == 0 -> lines += WorkLine(StepTitle.STARTING_GUESS, "x₀ = ${fmt(r.x, d)}")
         res.method == RootMethod.NEWTON -> {
             val p = res.rows[idx - 1]
             val dv = deriv(f, p.x)
-            lines += "Slope by central difference" to "f′(xₙ₋₁) ≈ (f(x+h) − f(x−h)) / 2h = ${fmt(dv, d)}"
-            lines += "Newton step" to "xₙ = xₙ₋₁ − f(xₙ₋₁) / f′(xₙ₋₁) = ${fmt(p.x, d)} − " +
-                "(${fmt(p.fx, d)}) / (${fmt(dv, d)}) = ${fmt(r.x, d)}"
+            lines += WorkLine(StepTitle.SLOPE, "f′(xₙ₋₁) ≈ (f(x+h) − f(x−h)) / 2h = ${fmt(dv, d)}")
+            lines += WorkLine(StepTitle.NEWTON_STEP, "xₙ = xₙ₋₁ − f(xₙ₋₁) / f′(xₙ₋₁) = ${fmt(p.x, d)} − " +
+                "(${fmt(p.fx, d)}) / (${fmt(dv, d)}) = ${fmt(r.x, d)}")
         }
-        idx < 2 -> lines += "Starting guess" to "x${if (idx == 0) "₀" else "₁"} = ${fmt(r.x, d)}"
+        idx < 2 -> lines += WorkLine(StepTitle.STARTING_GUESS, "x${if (idx == 0) "₀" else "₁"} = ${fmt(r.x, d)}")
         else -> {
             val p1 = res.rows[idx - 1]
             val p0 = res.rows[idx - 2]
-            lines += "Secant step" to "xₙ = xₙ₋₁ − f(xₙ₋₁)(xₙ₋₁ − xₙ₋₂) / (f(xₙ₋₁) − f(xₙ₋₂))"
-            lines += "With numbers" to "${fmt(p1.x, d)} − (${fmt(p1.fx, d)})(${fmt(p1.x - p0.x, d)}) / " +
-                "(${fmt(p1.fx - p0.fx, d)}) = ${fmt(r.x, d)}"
+            lines += WorkLine(StepTitle.SECANT_STEP, "xₙ = xₙ₋₁ − f(xₙ₋₁)(xₙ₋₁ − xₙ₋₂) / (f(xₙ₋₁) − f(xₙ₋₂))")
+            lines += WorkLine(StepTitle.WITH_NUMBERS, "${fmt(p1.x, d)} − (${fmt(p1.fx, d)})(${fmt(p1.x - p0.x, d)}) / " +
+                "(${fmt(p1.fx - p0.fx, d)}) = ${fmt(r.x, d)}")
         }
     }
-    if (r.abs != null) lines += "Change" to "|xₙ − xₙ₋₁| = ${fmtE(r.abs)}"
+    if (r.abs != null) lines += WorkLine(StepTitle.CHANGE, "|xₙ − xₙ₋₁| = ${fmtE(r.abs)}")
     val note = when {
         idx != res.rows.lastIndex -> null
-        res.converged -> "Stopped here because the change ${fmtE(r.abs)} is below the tolerance ${jsNum(res.tol)}."
-        else -> "Stopped at the iteration limit before the change dropped below the tolerance."
+        res.converged -> StopNote.Converged(fmtE(r.abs), jsNum(res.tol))
+        else -> StopNote.IterationLimit
     }
     return Working(lines, note)
 }
