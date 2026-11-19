@@ -86,6 +86,8 @@ fun SettingsSheet(
                             { update { it.copy(decimals = (s.decimals + 1).coerceAtMost(10)) } })
                     }
                 }
+                // #34: explain when the defaults are used, so a change here never looks like it did nothing.
+                Text(stringResource(R.string.settings_defaults_hint), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 SectionLabel(stringResource(R.string.settings_about))
