@@ -4,6 +4,5 @@
     <include domain="database" path="numlab.db" />
     <include domain="file" path="datastore/settings.preferences_pb" />
 
-    <!-- UMP and Google Ads store consent and ad state in shared preferences. -->
-    <exclude domain="sharedpref" path="." />
+    <!-- Shared preferences are omitted because only the paths above are included. -->
 </full-backup-content>
