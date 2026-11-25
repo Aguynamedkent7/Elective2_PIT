@@ -43,9 +43,15 @@ object Fmt {
     }
 
     /** `String(+v.toPrecision(5))` from math.js: 5 significant digits, trailing zeros dropped. */
-    fun sig5(v: Double): String =
-        jsNum(BigDecimal(v).round(MathContext(5, RoundingMode.HALF_UP)).toDouble())
+    fun sig5(v: Double): String {
+        if (!v.isFinite()) return jsNum(v)
 
+        return jsNum(
+            BigDecimal(v)
+                .round(MathContext(5, RoundingMode.HALF_UP))
+                .toDouble()
+        )
+    }
     /**
      * JS `Number#toString` for finite doubles: plain notation for 1e-7 < |v| < 1e21,
      * otherwise `1.5e-7` / `1e+21`.

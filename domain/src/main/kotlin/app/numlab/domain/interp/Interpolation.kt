@@ -72,16 +72,42 @@ data class InterpResult(
     val fTrue: CompiledFn?,
 )
 
+private const val NUMERIC_RANGE_ERROR =
+    "Interpolation exceeded the supported numeric range. Check for very large values or x values that are too close together."
+
+private fun requireFinite(value: Double): Double {
+    if (!value.isFinite()) {
+        throw DomainException(NUMERIC_RANGE_ERROR)
+    }
+
+    return value
+}
+
 private fun polyMul(p: List<Double>, q: List<Double>): List<Double> {
     val r = DoubleArray(p.size + q.size - 1)
-    p.forEachIndexed { i, a -> q.forEachIndexed { j, b -> r[i + j] += a * b } }
+
+    p.forEachIndexed { i, a ->
+        q.forEachIndexed { j, b ->
+            r[i + j] = requireFinite(
+                r[i + j] + requireFinite(a * b)
+            )
+        }
+    }
+
     return r.toList()
 }
 
 private fun polyAdd(p: List<Double>, q: List<Double>): List<Double> {
     val r = DoubleArray(max(p.size, q.size))
-    p.forEachIndexed { i, a -> r[i] += a }
-    q.forEachIndexed { i, a -> r[i] += a }
+
+    p.forEachIndexed { i, a ->
+        r[i] = requireFinite(r[i] + a)
+    }
+
+    q.forEachIndexed { i, a ->
+        r[i] = requireFinite(r[i] + a)
+    }
+
     return r.toList()
 }
 
@@ -139,19 +165,44 @@ fun interpolate(inp: InterpInput): InterpResult {
     val dd = mutableListOf(ys)
     for (j in 1..n) {
         val prev = dd[j - 1]
-        dd += (0..n - j).map { i -> (prev[i + 1] - prev[i]) / (xs[i + j] - xs[i]) }
+
+        dd += (0..n - j).map { i ->
+            val denominator = xs[i + j] - xs[i]
+
+            if (denominator == 0.0 || !denominator.isFinite()) {
+                throw DomainException(
+                    "x values must be sufficiently far apart for stable interpolation"
+                )
+            }
+
+            requireFinite(
+                (prev[i + 1] - prev[i]) / denominator
+            )
+        }
     }
     val newtonEval = { x: Double ->
         var r = dd[n][0]
-        for (k in n - 1 downTo 0) r = r * (x - xs[k]) + dd[k][0]
+        for (k in n - 1 downTo 0) {
+            r = requireFinite(r * (x - xs[k]) + dd[k][0])
+        }
         r
     }
+
     val basisAt = { x: Double, i: Int ->
         var l = 1.0
-        for (j in 0..n) if (j != i) l *= (x - xs[j]) / (xs[i] - xs[j])
+        for (j in 0..n) {
+            if (j != i) {
+                l = requireFinite(l * ((x - xs[j]) / (xs[i] - xs[j])))
+            }
+        }
         l
     }
-    val lagrangeEval = { x: Double -> ys.indices.fold(0.0) { s, i -> s + ys[i] * basisAt(x, i) } }
+
+    val lagrangeEval = { x: Double ->
+        ys.indices.fold(0.0) { s, i ->
+            requireFinite(s + requireFinite(ys[i] * basisAt(x, i)))
+        }
+    }
 
     var coeffs = listOf(0.0)
     var polyForm = ""
@@ -160,25 +211,53 @@ fun interpolate(inp: InterpInput): InterpResult {
         for (i in 0..n) {
             var b = listOf(1.0)
             var den = 1.0
+
             for (j in 0..n) if (j != i) {
                 b = polyMul(b, listOf(-xs[j], 1.0))
-                den *= xs[i] - xs[j]
+                den = requireFinite(den * (xs[i] - xs[j]))
+
+                if (den == 0.0) {
+                    throw DomainException(
+                        "x values must be sufficiently far apart for stable interpolation"
+                    )
+                }
             }
-            coeffs = polyAdd(coeffs, b.map { it * ys[i] / den })
+
+            coeffs = polyAdd(
+                coeffs,
+                b.map {
+                    requireFinite(requireFinite(it * ys[i]) / den)
+                }
+            )
         }
+
         basis = xs.indices.map { i ->
-            val l = basisAt(xe, i)
-            BasisTerm(i, xs[i], ys[i], l, ys[i] * l)
+            val l = requireFinite(basisAt(xe, i))
+
+            BasisTerm(
+                i,
+                xs[i],
+                ys[i],
+                l,
+                requireFinite(ys[i] * l)
+            )
         }
     } else {
         var acc = listOf(dd[n][0])
-        for (k in n - 1 downTo 0) acc = polyAdd(polyMul(acc, listOf(-xs[k], 1.0)), listOf(dd[k][0]))
+        for (k in n - 1 downTo 0) {
+            acc = polyAdd(
+                polyMul(acc, listOf(-xs[k], 1.0)),
+                listOf(dd[k][0])
+            )
+        }
+
         coeffs = acc
-        polyForm = dd.mapIndexed { j, col -> sig5(col[0]) + (0 until j).joinToString("") { xTerm(xs[it]) } }
-            .joinToString(" + ").replace("+ -", "− ").replace(Regex("^-"), "−")
+        polyForm = dd.mapIndexed { j, col ->
+            sig5(col[0]) + (0 until j).joinToString("") { xTerm(xs[it]) }
+        }.joinToString(" + ").replace("+ -", "− ").replace(Regex("^-"), "−")
     }
     val p: (Double) -> Double = if (inp.method == InterpMethod.LAGRANGE) lagrangeEval else newtonEval
-    val pxe = p(xe)
+    val pxe = requireFinite(p(xe))
 
     val fTrue = if (inp.truth == Truth.FN) ExprParser.compileOrThrow(inp.fx) else null
     val yTrue = when (inp.truth) {
@@ -187,8 +266,17 @@ fun interpolate(inp: InterpInput): InterpResult {
         Truth.NONE -> null
     }
     val metrics = yTrue?.let {
-        val rel = if (it == 0.0) null else (it - pxe) / it * 100
-        ErrorMetrics(it, abs(it - pxe), rel, rel?.let(::abs), fTrue?.let { f -> bound(f, xs, xe) })
+        val absoluteError = requireFinite(abs(it - pxe))
+        val rel = if (it == 0.0) null
+            else requireFinite((it - pxe) / it * 100)
+
+        ErrorMetrics(
+            it,
+            absoluteError,
+            rel,
+            rel?.let(::abs),
+            fTrue?.let { f -> bound(f, xs, xe) }
+        )
     }
     return InterpResult(
         method = inp.method, points = pts, n = n, xe = xe, p = p, pxe = pxe, coeffs = coeffs,
@@ -216,6 +304,22 @@ private fun bound(f: CompiledFn, xs: List<Double>, xe: Double): ErrorBound? {
     if (m == null) return null
     var fact = 1.0
     for (i in 2..k) fact *= i
-    val prod = xs.fold(1.0) { a, xi -> a * (xe - xi) }
-    return ErrorBound(m, fact, prod, m / fact * abs(prod), k, xe < xs[0] || xe > xs[n])
+    val prod = xs.fold(1.0) { a, xi ->
+        a * (xe - xi)
+    }
+
+    val value = m / fact * abs(prod)
+
+    if (!prod.isFinite() || !value.isFinite()) {
+        return null
+    }
+
+    return ErrorBound(
+        m,
+        fact,
+        prod,
+        value,
+        k,
+        xe < xs[0] || xe > xs[n]
+    )
 }
