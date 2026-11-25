@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Keep app data needed to resume work and preserve the user's notebook. -->
+        <include domain="database" path="numlab.db" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
+
+        <!-- Shared preferences are omitted because only the paths above are included. -->
+    </cloud-backup>
+    <device-transfer>
+        <!-- Use the same deliberate policy for device-to-device transfers. -->
+        <include domain="database" path="numlab.db" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
+        <!-- Shared preferences are omitted because only the paths above are included. -->
+    </device-transfer>
+</data-extraction-rules>
