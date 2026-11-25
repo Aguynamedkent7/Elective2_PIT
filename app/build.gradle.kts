@@ -51,6 +51,10 @@ android {
             buildConfigField("String", "ADMOB_BANNER_ID",
                 "\"${providers.gradleProperty("numlab.admob.bannerId").getOrElse(admobTestBannerId)}\"")
         }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
     buildFeatures {
         compose = true
@@ -58,7 +62,7 @@ android {
     }
 }
 
-kotlin { jvmToolchain(17) }
+kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation(project(":ui"))

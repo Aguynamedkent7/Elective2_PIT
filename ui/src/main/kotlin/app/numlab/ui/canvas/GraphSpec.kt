@@ -6,10 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import app.numlab.domain.format.Fmt.fmt
 import app.numlab.domain.interp.InterpResult
 import app.numlab.domain.roots.RootMethod
 import app.numlab.domain.roots.RootResult
+import app.numlab.ui.R
 import app.numlab.ui.chart.Curve
 import app.numlab.ui.chart.Overlay
 import app.numlab.ui.chart.PlotPoint
@@ -56,8 +58,8 @@ fun rootSpec(res: RootResult, k: Int, stepMs: Int, dp: Int, ink: GraphInk): Grap
     val pts = rows.take(k).mapIndexed { i, r ->
         PlotPoint(PointKind.ITER, r.x, r.fx, alpha = 0.35f + 0.4f * i / max(1, k))
     }.toMutableList()
-    pts += if (k == rows.lastIndex) PlotPoint(PointKind.ROOT, v(0), v(1), "x* ≈ ${fmt(cur.x, minOf(dp, 6))}")
-    else PlotPoint(PointKind.DATA, v(0), v(1), "n = ${cur.n}", color = ink.hot)
+    pts += if (k == rows.lastIndex) PlotPoint(PointKind.ROOT, v(0), v(1), stringResource(R.string.graph_point_root, fmt(cur.x, minOf(dp, 6))))
+    else PlotPoint(PointKind.DATA, v(0), v(1), stringResource(R.string.graph_point_iter, cur.n), color = ink.hot)
     val ov = mutableListOf<Overlay>()
     when {
         res.method == RootMethod.BISECTION -> {
@@ -79,9 +81,10 @@ fun rootSpec(res: RootResult, k: Int, stepMs: Int, dp: Int, ink: GraphInk): Grap
 }
 
 /** Interpolation: P(x), dashed true f(x), draggable nodes, draggable evaluation line. */
+@Composable
 fun interpSpec(res: InterpResult, ink: GraphInk, domain: Pair<Double, Double>): GraphSpec {
     val pts = res.points.mapIndexed { i, p -> PlotPoint(PointKind.DATA, p.x, p.y, dragId = i) }.toMutableList()
-    pts += PlotPoint(PointKind.TARGET, res.xe, res.pxe, "P(${fmt(res.xe, 3)})")
+    pts += PlotPoint(PointKind.TARGET, res.xe, res.pxe, stringResource(R.string.p_label_short, fmt(res.xe, 3)))
     res.metrics?.let { pts += PlotPoint(PointKind.TRUE, res.xe, it.yTrue) }
     val curves = mutableListOf(Curve(res.p, ink.curve, 3f, fit = res.fTrue == null, label = "P(x)"))
     res.fTrue?.let { f -> curves += Curve({ f.eval(it) }, ink.ink2, 2f, dashed = true, probe = false) }

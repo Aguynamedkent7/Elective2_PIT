@@ -14,6 +14,8 @@ import app.numlab.domain.repo.HistoryRepository
 import app.numlab.domain.repo.SaveResult
 import app.numlab.domain.roots.RootInput
 import app.numlab.domain.roots.RootMethod
+import app.numlab.domain.roots.StepTitle
+import app.numlab.domain.roots.StopNote
 import app.numlab.domain.usecase.BuildExportUseCase
 import app.numlab.domain.usecase.DeleteRunUseCase
 import app.numlab.domain.usecase.ExplainStepUseCase
@@ -49,12 +51,12 @@ class ExtrasTest {
         assertTrue(ex(res, ExportFormat.CSV).startsWith("iter,x,f(x)"))
         assertEquals("x* ≈ 1.521380", ex(res, ExportFormat.PLAIN))
         val explain = ExplainStepUseCase()
-        assertEquals("Starting guess", explain(res, 0).lines[0].first)
-        assertEquals("Secant step", explain(res, 2).lines[0].first)
+        assertEquals(StepTitle.STARTING_GUESS, explain(res, 0).lines[0].title)
+        assertEquals(StepTitle.SECANT_STEP, explain(res, 2).lines[0].title)
         val newton = SolveRootUseCase()(root.copy(method = RootMethod.NEWTON)).getOrThrow()
-        assertEquals("Newton step", explain(newton, 1).lines[1].first)
+        assertEquals(StepTitle.NEWTON_STEP, explain(newton, 1).lines[1].title)
         val notConverged = SolveRootUseCase()(root.copy(method = RootMethod.BISECTION, maxIter = "3")).getOrThrow()
-        assertTrue(explain(notConverged, 2).note!!.startsWith("Stopped at the iteration limit"))
+        assertEquals(StopNote.IterationLimit, explain(notConverged, 2).note)
 
         val ip = InterpolateUseCase()(sin).getOrThrow()
         assertEquals("x,y\n0,0\n1,0.8415\n2,0.9093\n3,0.1411", ex(ip, ExportFormat.CSV))

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.WarningAmber
@@ -27,8 +28,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.numlab.domain.format.Fmt
 import app.numlab.domain.roots.RootResult
 import app.numlab.ui.R
@@ -63,7 +64,8 @@ fun BigNumber(value: Double, decimals: Int, style: TextStyle, modifier: Modifier
     Text(
         shown,
         modifier.semantics { contentDescription = final; liveRegion = LiveRegionMode.Polite },
-        style = style, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        style = style, maxLines = 1, softWrap = false,
+        autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = style.fontSize),
     )
 }
 

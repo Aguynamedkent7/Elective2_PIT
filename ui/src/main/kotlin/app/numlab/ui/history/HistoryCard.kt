@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Notes
@@ -205,7 +206,8 @@ private fun Summary(solved: Solved, ink: Color) {
         Column(Modifier.weight(1f)) {
             Text(Fmt.fmt(if (solved is Solved.Root) solved.res.root else (solved as Solved.Interp).res.pxe, 6),
                 style = TextStyle(fontFamily = Bricolage, fontWeight = FontWeight.SemiBold, fontSize = 38.sp, lineHeight = 44.sp,
-                    fontFeatureSettings = TNUM), maxLines = 1)
+                    fontFeatureSettings = TNUM), maxLines = 1, softWrap = false,
+                autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = 38.sp))
             FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp),
                 itemVerticalAlignment = Alignment.CenterVertically) {
                 val small = MaterialTheme.typography.bodySmall

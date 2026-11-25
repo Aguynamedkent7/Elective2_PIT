@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -170,7 +171,7 @@ fun CanvasSheet(
             AnimatedContent(tab, Modifier.weight(1f), label = "tab", transitionSpec = {
                 (fadeIn(tween(320)) + slideInVertically(tween(320, easing = Motion.Decelerate)) { it / 40 }).togetherWith(fadeOut(tween(100)))
             }) { t ->
-                Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 8.dp).navigationBarsPadding()) {
+                Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 8.dp).navigationBarsPadding().imePadding()) {
                     when (t) {
                         Tab.INPUTS -> if (st.module == Module.ROOTS) {
                             RootInputs(st.root, st.brackets, st.decimals, a.vm::setRoot, a.vm::applyPreset, a.vm::applyBracket, a.vm::setDecimals)
