@@ -28,8 +28,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+
 
 class ExtrasTest {
     private val root = RootInput(RootMethod.SECANT, "x^3 - x - 2", "1", "2", "1.5", "1", "2")
@@ -100,5 +102,66 @@ class ExtrasTest {
         assertTrue(ObserveHistoryUseCase(repo)().first().first().pinned)
         assertEquals(1L, DeleteRunUseCase(repo)(1)?.id)
         assertEquals(Draft(null, null, false), Draft(null, null, false))
+    }
+
+    @Test
+    fun `sig5 formats non-finite values without throwing`() {
+        assertEquals("NaN", Fmt.sig5(Double.NaN))
+        assertEquals("Infinity", Fmt.sig5(Double.POSITIVE_INFINITY))
+        assertEquals("-Infinity", Fmt.sig5(Double.NEGATIVE_INFINITY))
+    }
+
+    @Test
+    fun `interpolation reports numeric overflow as a domain error`() {
+        val huge = listOf(
+            PointRow("0", "1e308"),
+            PointRow("1", "-1e308"),
+            PointRow("2", "1e308"),
+        )
+
+        for (method in InterpMethod.entries) {
+            assertThrows(app.numlab.domain.model.DomainException::class.java) {
+                app.numlab.domain.interp.interpolate(
+                    InterpInput(method, huge, "1")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `interpolation reports near duplicate nodes as a domain error when arithmetic overflows`() {
+        val rows = listOf(
+            PointRow("0", "0"),
+            PointRow("1e-310", "1")
+        )
+
+        for (method in InterpMethod.entries) {
+            assertThrows(app.numlab.domain.model.DomainException::class.java) {
+                app.numlab.domain.interp.interpolate(
+                    InterpInput(method, rows, "0.5")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `large interpolation input never leaks arithmetic exceptions`() {
+        val rows = (0..299).map {
+            PointRow(it.toString(), (it * it).toString())
+        }
+
+        for (method in InterpMethod.entries) {
+            val thrown = runCatching {
+                app.numlab.domain.interp.interpolate(
+                    InterpInput(method, rows, "1")
+                )
+            }.exceptionOrNull()
+
+            assertTrue(
+                thrown == null ||
+                    thrown is app.numlab.domain.model.DomainException,
+                "$method leaked unexpected exception: $thrown"
+            )
+        }
     }
 }
