@@ -1,3 +1,4 @@
+
 package app.numlab.ui.workbench
 
 import androidx.compose.foundation.background
@@ -63,42 +64,128 @@ private const val MANY_POINTS = 30
 fun InterpInputs(inp: InterpInput, onChange: ((InterpInput) -> InterpInput) -> Unit) {
     var paste by rememberSaveable { mutableStateOf(false) }
     var text by rememberSaveable { mutableStateOf("") }
+
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Seg(listOf(InterpMethod.LAGRANGE to stringResource(R.string.method_lagrange),
-            InterpMethod.NEWTON_DD to stringResource(R.string.method_newton_dd)),
-            inp.method, { m -> onChange { it.copy(method = m) } })
+        Seg(
+            listOf(
+                InterpMethod.LAGRANGE to stringResource(R.string.method_lagrange),
+                InterpMethod.NEWTON_DD to stringResource(R.string.method_newton_dd)
+            ),
+            inp.method,
+            { m -> onChange { it.copy(method = m) } }
+        )
+
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionLabel(stringResource(R.string.examples))
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                INTERP_EXAMPLES.forEach { (label, ex) -> Pill(stringResource(label), { text = ""; onChange { ex } }) }
+            Row(
+                Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                INTERP_EXAMPLES.forEach { (label, ex) ->
+                    Pill(stringResource(label), {
+                        text = ""
+                        onChange { ex }
+                    })
+                }
             }
         }
+
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionLabel(stringResource(R.string.data_points), Modifier.weight(1f))
-                Pill(stringResource(R.string.rows), { paste = false }, active = !paste)
-                Pill(stringResource(R.string.paste), { paste = true }, Modifier.padding(start = 6.dp), active = paste)
+                SectionLabel(
+                    stringResource(R.string.data_points),
+                    Modifier.weight(1f)
+                )
+
+                Pill(
+                    stringResource(R.string.rows),
+                    {
+                        if (paste) {
+                            val parsed = parsePoints(text)
+
+                            if (parsed.rows.isNotEmpty()) {
+                                onChange { it.copy(rows = parsed.rows) }
+                            } else {
+                                onChange { it.copy(rows = BLANK_ROWS) }
+                            }
+                        }
+                        paste = false
+                    },
+                    active = !paste
+                )
+
+                Pill(
+                    stringResource(R.string.paste),
+                    {
+                        if (!paste) {
+                            text = inp.rows
+                                .filter { it.x.isNotBlank() || it.y.isNotBlank() }
+                                .joinToString("\n") { "${it.x} ${it.y}" }
+                        }
+                        paste = true
+                    },
+                    Modifier.padding(start = 6.dp),
+                    active = paste
+                )
             }
+
             if (paste) {
                 PasteBox(text) { t ->
                     text = t
-                    val p = parsePoints(t)
-                    if (p.rows.isNotEmpty()) onChange { it.copy(rows = p.rows) }
+
+                    if (t.isBlank() && inp.rows != BLANK_ROWS) {
+                        onChange { it.copy(rows = BLANK_ROWS) }
+                    }
                 }
             } else {
-                PointRows(inp.rows) { rows -> onChange { it.copy(rows = rows) } }
+                PointRows(inp.rows) { rows ->
+                    onChange { it.copy(rows = rows) }
+                }
             }
+
             val n = inp.rows.count { it.x.isNotBlank() }
-            if (n >= MANY_POINTS) Badge(stringResource(R.string.many_points_warning, n), BadgeKind.WARN, icon = Icons.Outlined.WarningAmber)
+
+            if (n >= MANY_POINTS) {
+                Badge(
+                    stringResource(R.string.many_points_warning, n),
+                    BadgeKind.WARN,
+                    icon = Icons.Outlined.WarningAmber
+                )
+            }
         }
-        NumStepper(stringResource(R.string.evaluate_at), inp.xEval) { v -> onChange { it.copy(xEval = v) } }
+
+        NumStepper(stringResource(R.string.evaluate_at), inp.xEval) { v ->
+            onChange { it.copy(xEval = v) }
+        }
+
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionLabel(stringResource(R.string.compare_exact))
-            Seg(listOf(Truth.NONE to stringResource(R.string.truth_none), Truth.FN to stringResource(R.string.truth_fn),
-                Truth.VALUE to stringResource(R.string.truth_value)), inp.truth, { t -> onChange { it.copy(truth = t) } })
+
+            Seg(
+                listOf(
+                    Truth.NONE to stringResource(R.string.truth_none),
+                    Truth.FN to stringResource(R.string.truth_fn),
+                    Truth.VALUE to stringResource(R.string.truth_value)
+                ),
+                inp.truth,
+                { t -> onChange { it.copy(truth = t) } }
+            )
+
             when (inp.truth) {
-                Truth.FN -> FxInput(inp.fx, { v -> onChange { it.copy(fx = v) } }, keys = false)
-                Truth.VALUE -> NumStepper(stringResource(R.string.y_true), inp.yTrue, step = 0.01) { v -> onChange { it.copy(yTrue = v) } }
+                Truth.FN -> FxInput(
+                    inp.fx,
+                    { v -> onChange { it.copy(fx = v) } },
+                    keys = false
+                )
+
+                Truth.VALUE -> NumStepper(
+                    stringResource(R.string.y_true),
+                    inp.yTrue,
+                    step = 0.01
+                ) { v ->
+                    onChange { it.copy(yTrue = v) }
+                }
+
                 Truth.NONE -> Unit
             }
         }
@@ -110,24 +197,63 @@ private fun PasteBox(text: String, onText: (String) -> Unit) {
     val cs = MaterialTheme.colorScheme
     val parsed = parsePoints(text)
     val label = stringResource(R.string.paste)
+
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Column(Modifier.fillMaxWidth().heightIn(min = 120.dp).background(cs.surfaceVariant, RoundedCornerShape(16.dp)).padding(14.dp)) {
-            if (text.isEmpty()) Text(stringResource(R.string.paste_placeholder), style = MonoStyle.copy(fontSize = 14.sp), color = cs.onSurfaceVariant.copy(alpha = 0.6f))
-            BasicTextField(text, onText, Modifier.fillMaxWidth().semantics { contentDescription = label },
-                textStyle = MonoStyle.copy(fontSize = 14.sp, lineHeight = 24.sp, color = cs.onSurface), cursorBrush = SolidColor(cs.primary),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, autoCorrectEnabled = false))
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 120.dp)
+                .background(cs.surfaceVariant, RoundedCornerShape(16.dp))
+                .padding(14.dp)
+        ) {
+            if (text.isEmpty()) {
+                Text(
+                    stringResource(R.string.paste_placeholder),
+                    style = MonoStyle.copy(fontSize = 14.sp),
+                    color = cs.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+
+            BasicTextField(
+                text,
+                onText,
+                Modifier.fillMaxWidth().semantics {
+                    contentDescription = label
+                },
+                textStyle = MonoStyle.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 24.sp,
+                    color = cs.onSurface
+                ),
+                cursorBrush = SolidColor(cs.primary),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    autoCorrectEnabled = false
+                )
+            )
         }
+
         val bad = parsed.odd || parsed.rows.size < 2
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(if (bad) Icons.Outlined.WarningAmber else Icons.Outlined.Check, null, Modifier.size(14.dp),
-                tint = if (parsed.odd) cs.error else cs.onSurfaceVariant)
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                if (bad) Icons.Outlined.WarningAmber else Icons.Outlined.Check,
+                null,
+                Modifier.size(14.dp),
+                tint = if (parsed.odd) cs.error else cs.onSurfaceVariant
+            )
+
             Text(
                 when {
                     parsed.odd -> stringResource(R.string.paste_odd)
                     parsed.rows.size < 2 -> stringResource(R.string.paste_hint)
                     else -> stringResource(R.string.paste_ok, parsed.rows.size)
                 },
-                style = MaterialTheme.typography.bodySmall, color = if (parsed.odd) cs.error else cs.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (parsed.odd) cs.error else cs.onSurfaceVariant
             )
         }
     }
@@ -138,30 +264,79 @@ private fun PasteBox(text: String, onText: (String) -> Unit) {
 private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
     val cs = MaterialTheme.colorScheme
     val focus = LocalFocusManager.current
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier.padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             SectionLabel("x", Modifier.weight(1f))
             SectionLabel("y", Modifier.weight(1f))
             Spacer(Modifier.width(48.dp))
         }
+
         rows.forEachIndexed { i, r ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(r.x to stringResource(R.string.cd_point_x, i), r.y to stringResource(R.string.cd_point_y, i)).forEachIndexed { k, (v, label) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    r.x to stringResource(R.string.cd_point_x, i),
+                    r.y to stringResource(R.string.cd_point_y, i)
+                ).forEachIndexed { k, (v, label) ->
                     BasicTextField(
-                        v, { nv -> onRows(rows.mapIndexed { j, row -> if (j != i) row else if (k == 0) row.copy(x = nv) else row.copy(y = nv) }) },
-                        Modifier.weight(1f).heightIn(min = 48.dp).background(cs.surfaceVariant, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 13.dp).semantics { contentDescription = label },
-                        textStyle = MonoStyle.copy(fontSize = 14.sp, color = cs.onSurface), singleLine = true,
+                        v,
+                        { nv ->
+                            onRows(
+                                rows.mapIndexed { j, row ->
+                                    if (j != i) row
+                                    else if (k == 0) row.copy(x = nv)
+                                    else row.copy(y = nv)
+                                }
+                            )
+                        },
+                        Modifier
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
+                            .background(cs.surfaceVariant, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 13.dp)
+                            .semantics { contentDescription = label },
+                        textStyle = MonoStyle.copy(
+                            fontSize = 14.sp,
+                            color = cs.onSurface
+                        ),
+                        singleLine = true,
                         cursorBrush = SolidColor(cs.primary),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Next, autoCorrectEnabled = false),
-                        keyboardActions = KeyboardActions(onNext = { focus.moveFocus(FocusDirection.Next) }),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Ascii,
+                            imeAction = ImeAction.Next,
+                            autoCorrectEnabled = false
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focus.moveFocus(FocusDirection.Next) }
+                        )
                     )
                 }
-                IconButton({ onRows(rows.filterIndexed { j, _ -> j != i }) }, enabled = rows.size > 2) {
-                    Icon(Icons.Outlined.DeleteOutline, stringResource(R.string.cd_remove_point, i), tint = cs.onSurfaceVariant)
+
+                IconButton(
+                    {
+                        onRows(rows.filterIndexed { j, _ -> j != i })
+                    },
+                    enabled = rows.size > 2
+                ) {
+                    Icon(
+                        Icons.Outlined.DeleteOutline,
+                        stringResource(R.string.cd_remove_point, i),
+                        tint = cs.onSurfaceVariant
+                    )
                 }
             }
         }
-        Pill(stringResource(R.string.add_point), { onRows(rows + PointRow("", "")) }, icon = Icons.Outlined.Add)
+
+        Pill(
+            stringResource(R.string.add_point),
+            { onRows(rows + PointRow("", "")) },
+            icon = Icons.Outlined.Add
+        )
     }
 }
