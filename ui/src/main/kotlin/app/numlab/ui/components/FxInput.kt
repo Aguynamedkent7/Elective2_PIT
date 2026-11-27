@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -85,7 +86,7 @@ fun FxInput(value: String, onChange: (String) -> Unit, modifier: Modifier = Modi
                         color = cs.onSurfaceVariant.copy(alpha = 0.6f))
                 }
                 BasicTextField(
-                    tfv, update, Modifier.fillMaxWidth().semantics { contentDescription = label },
+                    tfv, update, Modifier.fillMaxWidth().semantics { stateDescription = label },
                     textStyle = MonoStyle.copy(fontSize = 16.sp, fontWeight = FontWeight.Medium, color = cs.onSurface),
                     singleLine = true, cursorBrush = SolidColor(cs.primary),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Done,

@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -83,14 +85,42 @@ fun DataTable(
                         }
                     }
                 }
-                itemsIndexed(rows) { ri, row ->
+               val rowDescription = cols.zip(row).joinToString(", ") { (col, cell) ->
+    "${col.headerText()}: ${cell.text}"
+}
+
+Row(
+    Modifier
+        .background(bg)
+        .semantics {
+            contentDescription = rowDescription
+        }
+        .then(if (onRow != null) Modifier.clickable { onRow(ri) } else Modifier),
+    verticalAlignment = Alignment.CenterVertically
+) {
+    row.forEachIndexed { ci, cell ->
+        CellText(cell, fit[ci], pad, ri == active)
+    }
+}
                     val bg = when {
                         ri == active -> cs.primary.copy(alpha = 0.16f).compositeOver(cs.surface)
                         ri % 2 == 1 -> cs.surfaceVariant.copy(alpha = 0.55f).compositeOver(cs.surface)
                         else -> cs.surface
                     }
-                    Row(Modifier.background(bg).then(if (onRow != null) Modifier.clickable { onRow(ri) } else Modifier),
-                        verticalAlignment = Alignment.CenterVertically) {
+                    val rowDescription = cols.zip(row).joinToString(", ") { (col, cell) ->
+    "${col.headerText()}: ${cell.text}"
+}
+}
+
+Row(
+    Modifier
+        .background(bg)
+        .semantics {
+            contentDescription = rowDescription
+        }
+        .then(if (onRow != null) Modifier.clickable { onRow(ri) } else Modifier),
+    verticalAlignment = Alignment.CenterVertically
+) {
                         row.forEachIndexed { ci, cell -> CellText(cell, fit[ci], pad, ri == active) }
                     }
                 }

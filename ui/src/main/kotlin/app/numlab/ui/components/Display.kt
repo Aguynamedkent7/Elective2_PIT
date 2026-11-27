@@ -23,9 +23,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
+
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.liveRegion
+
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -40,7 +40,7 @@ import kotlin.math.max
 
 /**
  * Headline number that tweens from the previous value (560 ms, easeOutQuart; PLAN §7.4).
- * Announced politely to accessibility services with its final value.
+ * Exposes its final value to accessibility services.
  */
 @Composable
 fun BigNumber(value: Double, decimals: Int, style: TextStyle, modifier: Modifier = Modifier) {
@@ -63,7 +63,7 @@ fun BigNumber(value: Double, decimals: Int, style: TextStyle, modifier: Modifier
     val final = Fmt.fmt(value, decimals)
     Text(
         shown,
-        modifier.semantics { contentDescription = final; liveRegion = LiveRegionMode.Polite },
+        modifier.semantics { contentDescription = final },
         style = style, maxLines = 1, softWrap = false,
         autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = style.fontSize),
     )
