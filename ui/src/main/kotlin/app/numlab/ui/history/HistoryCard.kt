@@ -137,7 +137,7 @@ fun HistoryCard(card: Card, whenLabel: String, decimals: Int, a: CardActions) {
                         Modifier.graphicsLayer { rotationZ = spin; val s = 1f + (45f - spin) / 45f * 0.1f; scaleX = s; scaleY = s },
                         tint = ink.copy(alpha = if (item.pinned) 1f else 0.6f))
                 }
-                a.menu(card.result.getOrNull())
+                a.menu(solved)
             }
             Text(
                 when (run) {
