@@ -146,11 +146,16 @@ private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
         }
         rows.forEachIndexed { i, r ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(r.x to stringResource(R.string.cd_point_x, i), r.y to stringResource(R.string.cd_point_y, i)).forEachIndexed { k, (v, label) ->
+                listOf(
+    r.x to stringResource(R.string.cd_point_x, i + 1),
+    r.y to stringResource(R.string.cd_point_y, i + 1)
+).forEachIndexed { k, (v, label) ->
                     BasicTextField(
                         v, { nv -> onRows(rows.mapIndexed { j, row -> if (j != i) row else if (k == 0) row.copy(x = nv) else row.copy(y = nv) }) },
                         Modifier.weight(1f).heightIn(min = 48.dp).background(cs.surfaceVariant, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 13.dp).semantics { contentDescription = label },
+                           .padding(horizontal = 12.dp, vertical = 13.dp).semantics {
+    stateDescription = label
+},
                         textStyle = MonoStyle.copy(fontSize = 14.sp, color = cs.onSurface), singleLine = true,
                         cursorBrush = SolidColor(cs.primary),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Next, autoCorrectEnabled = false),
@@ -158,7 +163,11 @@ private fun PointRows(rows: List<PointRow>, onRows: (List<PointRow>) -> Unit) {
                     )
                 }
                 IconButton({ onRows(rows.filterIndexed { j, _ -> j != i }) }, enabled = rows.size > 2) {
-                    Icon(Icons.Outlined.DeleteOutline, stringResource(R.string.cd_remove_point, i), tint = cs.onSurfaceVariant)
+                Icon(
+    Icons.Outlined.DeleteOutline,
+    stringResource(R.string.cd_remove_point, i + 1),
+    tint = cs.onSurfaceVariant
+)
                 }
             }
         }

@@ -26,8 +26,8 @@
     <string name="cd_eval_slider">Evaluate at x</string>
     <string name="cd_decrease">Decrease %1$s</string>
     <string name="cd_increase">Increase %1$s</string>
-    <string name="cd_point_x">x%1$d</string>
-    <string name="cd_point_y">y%1$d</string>
+    <string name="cd_point_x">Point %1$d, x coordinate</string>
+    <string name="cd_point_y">Point %1$d, y coordinate</string>
 
     <string name="module_roots">Roots</string>
     <string name="module_interp">Interpolate</string>

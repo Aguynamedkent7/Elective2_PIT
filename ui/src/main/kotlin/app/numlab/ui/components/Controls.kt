@@ -55,6 +55,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -192,7 +193,7 @@ fun Stepper(
                 Text(display, style = style)
             } else {
                 BasicTextField(
-                    display, onText, Modifier.fillMaxWidth().semantics { contentDescription = label }, textStyle = style,
+                    display, onText, Modifier.fillMaxWidth().semantics { stateDescription = label }, textStyle = style,
                     singleLine = true, cursorBrush = SolidColor(cs.primary),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Next,
                         autoCorrectEnabled = false),
