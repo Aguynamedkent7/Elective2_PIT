@@ -83,7 +83,7 @@ fun RootInputs(
             item {
                 val n = inp.maxIter.toIntOrNull()
                 Stepper(stringResource(R.string.field_max_iter), inp.maxIter,
-                    { onChange { it.copy(maxIter = ((n ?: 110) - 10).coerceAtLeast(5).toString()) } },
+                    { onChange { it.copy(maxIter = ((n ?: 110) - 10).coerceAtLeast(1).toString()) } },
                     { onChange { it.copy(maxIter = ((n ?: 90) + 10).coerceAtMost(MAX_ITER_CAP).toString()) } },
                     onText = { v -> onChange { it.copy(maxIter = v) } })
             }
