@@ -3,7 +3,6 @@ package app.numlab.domain.export
 import app.numlab.domain.format.Fmt.fmt
 import app.numlab.domain.format.Fmt.jsNum
 import app.numlab.domain.format.Fmt.sig5
-import app.numlab.domain.format.Fmt.toFixed
 import app.numlab.domain.interp.InterpResult
 import app.numlab.domain.roots.RootResult
 import kotlin.math.abs
@@ -21,7 +20,15 @@ fun RootResult.toCsv(): String =
 fun InterpResult.toCsv(): String =
     (listOf("x,y") + points.map { "${jsNum(it.x)},${jsNum(it.y)}" }).joinToString("\n")
 
-fun RootResult.toLatex(): String = "x^{*} \\approx ${toFixed(root, 6)}"
+fun RootResult.toLatex(decimals: Int = 6): String {
+    val s = fmt(root, decimals)
+    val sci = Regex("^(-?[0-9.]+)e([+-])([0-9]+)$").matchEntire(s)
+    val body = if (sci == null) s else {
+        val (mantissa, sign, power) = sci.destructured
+        "$mantissa \\times 10^{${if (sign == "-") "-" else ""}$power}"
+    }
+    return "x^{*} \\approx $body"
+}
 
 fun InterpResult.toLatex(): String {
     val terms = coeffs.withIndex().reversed().filter { abs(it.value) > 1e-9 }
