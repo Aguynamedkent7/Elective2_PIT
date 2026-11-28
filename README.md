@@ -69,7 +69,7 @@ Get the latest APK from the [**Releases**](https://github.com/Aguynamedkent7/Ele
 
 ## Building from source
 
-**Requirements:** JDK 17+ and the Android SDK (compile SDK 37). Android Studio isn't required.
+**Requirements:** JDK 21 (the Gradle toolchain is set to 21; JDK 17 fails with "Cannot find a Java installation matching languageVersion=21") and the Android SDK (compile SDK 37). Android Studio isn't required. On Windows, use `.\gradlew.bat` instead of `./gradlew`, and set `ANDROID_HOME` or `sdk.dir` in a git-ignored `local.properties` if Gradle reports "SDK location not found".
 
 ```sh
 git clone https://github.com/Aguynamedkent7/Elective2_PIT.git
